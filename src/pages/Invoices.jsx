@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { getTenants } from '../api/tenants'
 import { getInvoices, generateInvoice } from '../api/invoices'
@@ -73,7 +74,7 @@ export default function Invoices() {
             <tr key={inv.id}>
               <td>{inv.contract?.tenant?.user?.name}</td>
               <td>{inv.contract?.room?.room_number}</td>
-              <td>{inv.period}</td>
+              <td><Link to={`/invoices/${inv.id}`}>{inv.period}</Link></td>
               <td>Rp {Number(inv.total_amount).toLocaleString('id-ID')}</td>
               <td>{inv.due_date}</td>
               <td>{STATUS_LABEL[inv.status]}</td>
