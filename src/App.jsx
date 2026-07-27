@@ -7,6 +7,7 @@ import Rooms from './pages/Rooms'
 import Tenants from './pages/Tenants'
 import Invoices from './pages/Invoices'
 import InvoiceDetail from './pages/InvoiceDetail'
+import Contracts from './pages/Contracts'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/tenants" element={<Tenants />} />
           <Route path="/invoices" element={<Invoices />} />
           <Route path="/invoices/:id" element={<InvoiceDetail />} />
+          <Route path='/contracts' element={<Contracts/>}/>
          </Route>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
