@@ -9,6 +9,7 @@ import Invoices from './pages/Invoices'
 import InvoiceDetail from './pages/InvoiceDetail'
 import Contracts from './pages/Contracts'
 import Maintenance from './pages/Maintenance'
+import Announcements from './pages/Announcements'
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/invoices/:id" element={<InvoiceDetail />} />
           <Route path='/contracts' element={<Contracts/>}/>
           <Route path='/maintenance' element={<Maintenance/>} />
+          <Route path='/announcements' element={<Announcements/>} />
          </Route>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
