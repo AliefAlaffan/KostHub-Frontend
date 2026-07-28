@@ -8,6 +8,7 @@ import Tenants from './pages/Tenants'
 import Invoices from './pages/Invoices'
 import InvoiceDetail from './pages/InvoiceDetail'
 import Contracts from './pages/Contracts'
+import Maintenance from './pages/Maintenance'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/invoices" element={<Invoices />} />
           <Route path="/invoices/:id" element={<InvoiceDetail />} />
           <Route path='/contracts' element={<Contracts/>}/>
+          <Route path='/maintenance' element={<Maintenance/>} />
          </Route>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
