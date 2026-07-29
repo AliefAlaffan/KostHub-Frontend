@@ -10,6 +10,7 @@ import InvoiceDetail from './pages/InvoiceDetail'
 import Contracts from './pages/Contracts'
 import Maintenance from './pages/Maintenance'
 import Announcements from './pages/Announcements'
+import Reports from './pages/Reports'
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
           <Route path='/contracts' element={<Contracts/>}/>
           <Route path='/maintenance' element={<Maintenance/>} />
           <Route path='/announcements' element={<Announcements/>} />
+          <Route path='/reports' element={<Reports/>} />
          </Route>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>

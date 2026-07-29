@@ -24,6 +24,7 @@ export default function Dashboard() {
         <Link to="/invoices">Tagihan</Link>
         <Link to="/maintenance">Maintenance</Link>
         <Link to="/announcements">Pengumuman</Link>
+        <Link to="/reports">Laporan</Link>
       </nav>
       <p>Halo, {user?.name} ({user?.role})</p>
       <button onClick={handleLogout}>Keluar</button>
