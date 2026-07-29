@@ -12,6 +12,7 @@ import Announcements from './pages/Announcements'
 import Reports from './pages/Reports'
 import ProtectedRoute from './routes/ProtectedRoute'
 import AppLayout from './components/AppLayout'
+import UserManagement from './pages/UserManagement'
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
             <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
               <Route path="/properties" element={<Properties />} />
               <Route path="/reports" element={<Reports />} />
+              <Route path="/users" element={<UserManagement />} />
             </Route>
 
             {/* Semua role boleh akses (tapi kontennya beda sesuai role di dalam komponennya) */}

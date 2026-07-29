@@ -13,6 +13,7 @@ const MENU = {
     { to: '/maintenance', label: 'Maintenance' },
     { to: '/announcements', label: 'Pengumuman' },
     { to: '/reports', label: 'Laporan' },
+    { to: '/users', label: 'User'},
   ],
   staff: [
     { to: '/', label: 'Tugas Hari Ini' },
