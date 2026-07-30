@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getInvoice } from '../api/invoices'
-import { createPayment, verifyPayment, rejectPayment } from '../api/payments'
+import { getInvoice } from '../../api/invoices'
+import { createPayment, verifyPayment, rejectPayment } from '../../api/payments'
 
 export default function InvoiceDetail() {
   const { id } = useParams()

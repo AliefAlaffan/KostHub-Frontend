@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { getProperties } from '../api/properties'
-import { getUsers, createStaff, resetUserPassword, toggleUserStatus } from '../api/users'
+import { getProperties } from '../../api/properties'
+import { getUsers, createStaff, resetUserPassword, toggleUserStatus } from '../../api/users'
 
 export default function UserManagement() {
   const [users, setUsers] = useState([])

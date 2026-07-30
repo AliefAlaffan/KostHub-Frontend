@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getContracts, renewContract, checkoutContract } from '../api/contracts'
+import { getContracts, renewContract, checkoutContract } from '../../api/contracts'
 
 const STATUS_LABEL = {
   active: 'Aktif', ending_soon: 'Akan Berakhir', ended: 'Berakhir', renewed: 'Diperpanjang',

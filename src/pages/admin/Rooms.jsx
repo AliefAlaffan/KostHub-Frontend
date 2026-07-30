@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { getProperties } from '../api/properties'
-import { getRooms, createRoom, updateRoomStatus } from '../api/rooms'
+import { getProperties } from '../../api/properties'
+import { getRooms, createRoom, updateRoomStatus } from '../../api/rooms'
 
 const STATUS_COLOR = {
   available: '#3F7D5C',

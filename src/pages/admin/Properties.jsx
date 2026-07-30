@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getProperties, createProperty } from '../api/properties'
+import { getProperties, createProperty } from '../../api/properties'
 
 export default function Properties() {
   const [properties, setProperties] = useState([])

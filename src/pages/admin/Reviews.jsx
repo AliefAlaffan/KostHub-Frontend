@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useAuthStore } from '../store/authStore'
-import { getProperties } from '../api/properties'
-import { getReviews, createReview, replyReview } from '../api/reviews'
+import { useAuthStore } from '../../store/authStore'
+import { getProperties } from '../../api/properties'
+import { getReviews, createReview, replyReview } from '../../api/reviews'
 
 export default function Reviews() {
   const { user } = useAuthStore()

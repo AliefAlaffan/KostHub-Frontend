@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useAuthStore } from '../store/authStore'
-import { getAnnouncements, createAnnouncement } from '../api/announcements'
+import { useAuthStore } from '../../store/authStore'
+import { getAnnouncements, createAnnouncement } from '../../api/announcements'
 
 export default function Announcements() {
   const { user } = useAuthStore()

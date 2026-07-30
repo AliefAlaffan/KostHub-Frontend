@@ -1,21 +1,43 @@
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useAuthStore } from './store/authStore'
+import { getMe } from './api/auth'
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
-import Properties from './pages/Properties'
-import Rooms from './pages/Rooms'
-import Tenants from './pages/Tenants'
-import Contracts from './pages/Contracts'
-import Invoices from './pages/Invoices'
-import InvoiceDetail from './pages/InvoiceDetail'
-import Maintenance from './pages/Maintenance'
-import Announcements from './pages/Announcements'
-import Reports from './pages/Reports'
+import DashboardSwitch from './pages/DashboardSwitch'
+import RoomsSwitch from './pages/RoomsSwitch'
+import TenantsSwitch from './pages/TenantsSwitch'
+import ContractsSwitch from './pages/ContractsSwitch'
+import InvoicesSwitch from './pages/InvoicesSwitch'
+import InvoiceDetailSwitch from './pages/InvoiceDetailSwitch'
+import MaintenanceSwitch from './pages/MaintenanceSwitch'
+import AnnouncementsSwitch from './pages/AnnouncementsSwitch'
+import Properties from './pages/admin/Properties'
+import Reports from './pages/admin/Reports'
+import UserManagement from './pages/admin/UserManagement'
+import Reviews from './pages/admin/Reviews'
 import ProtectedRoute from './routes/ProtectedRoute'
 import AppLayout from './components/AppLayout'
-import UserManagement from './pages/UserManagement'
-import Reviews from './pages/Reviews'
 
 export default function App() {
+  const { token, user, setUser, clearAuth } = useAuthStore()
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Kalau ada token tapi data user belum ke-load (misal abis refresh halaman), ambil ulang dari backend
+    if (token && !user) {
+      getMe()
+        .then((data) => setUser(data))
+        .catch(() => clearAuth())
+        .finally(() => setLoading(false))
+    } else {
+      setLoading(false)
+    }
+  }, [token, user])
+
+  if (loading) {
+    return <div className="p-10 text-center text-slate-muted">Memuat...</div>
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -23,28 +45,25 @@ export default function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<DashboardSwitch />} />
 
-            {/* Hanya admin & staff */}
             <Route element={<ProtectedRoute allowedRoles={['admin', 'staff']} />}>
-              <Route path="/rooms" element={<Rooms />} />
-              <Route path="/tenants" element={<Tenants />} />
-              <Route path="/contracts" element={<Contracts />} />
+              <Route path="/rooms" element={<RoomsSwitch />} />
+              <Route path="/tenants" element={<TenantsSwitch />} />
+              <Route path="/contracts" element={<ContractsSwitch />} />
             </Route>
 
-            {/* Hanya admin */}
             <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
               <Route path="/properties" element={<Properties />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/users" element={<UserManagement />} />
             </Route>
 
-            {/* Semua role boleh akses (tapi kontennya beda sesuai role di dalam komponennya) */}
-            <Route path="/invoices" element={<Invoices />} />
-            <Route path="/invoices/:id" element={<InvoiceDetail />} />
-            <Route path="/maintenance" element={<Maintenance />} />
-            <Route path="/announcements" element={<Announcements />} />
-            <Route path='/reviews' element={<Reviews/>}/>
+            <Route path="/invoices" element={<InvoicesSwitch />} />
+            <Route path="/invoices/:id" element={<InvoiceDetailSwitch />} />
+            <Route path="/maintenance" element={<MaintenanceSwitch />} />
+            <Route path="/announcements" element={<AnnouncementsSwitch />} />
+            <Route path="/reviews" element={<Reviews />} />
           </Route>
         </Route>
 

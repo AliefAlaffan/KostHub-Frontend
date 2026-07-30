@@ -12,9 +12,9 @@ const MENU = {
     { to: '/invoices', label: 'Tagihan' },
     { to: '/maintenance', label: 'Maintenance' },
     { to: '/announcements', label: 'Pengumuman' },
+    { to: '/reviews', label: 'Review' },
     { to: '/reports', label: 'Laporan' },
-    { to: '/users', label: 'User'},
-    { to: '/reviews', label: 'Reviews'},
+    { to: '/users', label: 'Manajemen User' },
   ],
   staff: [
     { to: '/', label: 'Tugas Hari Ini' },
@@ -30,7 +30,7 @@ const MENU = {
     { to: '/invoices', label: 'Tagihan Saya' },
     { to: '/maintenance', label: 'Komplain' },
     { to: '/announcements', label: 'Pengumuman' },
-    { to: '/reviews', label: 'Reviews'},
+    { to: '/reviews', label: 'Beri Ulasan' },
   ],
 }
 
@@ -46,23 +46,32 @@ export default function Sidebar() {
   }
 
   return (
-    <nav style={{ width: 180, borderRight: '1px solid #ccc', padding: 16, minHeight: '100vh' }}>
-      <div style={{ marginBottom: 16, fontWeight: 'bold' }}>{user?.name}</div>
-      <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>{user?.role}</div>
-      {menu.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          end={item.to === '/'}
-          style={({ isActive }) => ({
-            display: 'block', padding: '6px 0', textDecoration: 'none',
-            color: isActive ? '#1E3A52' : '#333', fontWeight: isActive ? 'bold' : 'normal',
-          })}
-        >
-          {item.label}
-        </NavLink>
-      ))}
-      <button onClick={handleLogout} style={{ marginTop: 16 }}>Keluar</button>
-    </nav>
+    <aside className="w-56 shrink-0 bg-white border-r border-slate-muted/15 flex flex-col h-screen sticky top-0">
+      <div className="px-4 py-5 border-b border-slate-muted/15">
+        <div className="text-lg font-semibold text-ledger">Manajemen Kost</div>
+        <div className="text-xs text-slate-muted mt-0.5">{user?.name} · {user?.role}</div>
+      </div>
+      <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+        {menu.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.to === '/'}
+            className={({ isActive }) =>
+              `block px-3 py-2 rounded-md text-sm font-medium ${
+                isActive ? 'bg-ledger text-white' : 'text-ink hover:bg-paper'
+              }`
+            }
+          >
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+      <div className="px-2 py-4 border-t border-slate-muted/15">
+        <button onClick={handleLogout} className="w-full text-left px-3 py-2 rounded-md text-sm text-slate-muted hover:bg-paper">
+          Keluar
+        </button>
+      </div>
+    </aside>
   )
 }

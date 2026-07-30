@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { getProperties } from '../api/properties'
-import { getRooms } from '../api/rooms'
-import { getTenants, createTenant } from '../api/tenants'
+import { getProperties } from '../../api/properties'
+import { getRooms } from '../../api/rooms'
+import { getTenants, createTenant } from '../../api/tenants'
 
 export default function Tenants() {
   const [properties, setProperties] = useState([])

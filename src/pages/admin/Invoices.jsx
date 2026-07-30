@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { getTenants } from '../api/tenants'
-import { getInvoices, generateInvoice } from '../api/invoices'
+import { getTenants } from '../../api/tenants'
+import { getInvoices, generateInvoice } from '../../api/invoices'
 
 const STATUS_LABEL = {
   unpaid: 'Belum Dibayar', partial: 'Sebagian', paid: 'Lunas', overdue: 'Terlambat',

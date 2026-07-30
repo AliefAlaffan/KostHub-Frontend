@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import apiClient from '../api/client'
+import apiClient from '../../api/client'
 
 export default function Reports() {
   const [occupancy, setOccupancy] = useState(null)
