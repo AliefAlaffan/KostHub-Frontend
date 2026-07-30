@@ -13,6 +13,7 @@ import Reports from './pages/Reports'
 import ProtectedRoute from './routes/ProtectedRoute'
 import AppLayout from './components/AppLayout'
 import UserManagement from './pages/UserManagement'
+import Reviews from './pages/Reviews'
 
 export default function App() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
             <Route path="/invoices/:id" element={<InvoiceDetail />} />
             <Route path="/maintenance" element={<Maintenance />} />
             <Route path="/announcements" element={<Announcements />} />
+            <Route path='/reviews' element={<Reviews/>}/>
           </Route>
         </Route>
 

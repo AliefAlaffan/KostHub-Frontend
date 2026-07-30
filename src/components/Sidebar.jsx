@@ -14,6 +14,7 @@ const MENU = {
     { to: '/announcements', label: 'Pengumuman' },
     { to: '/reports', label: 'Laporan' },
     { to: '/users', label: 'User'},
+    { to: '/reviews', label: 'Reviews'},
   ],
   staff: [
     { to: '/', label: 'Tugas Hari Ini' },
@@ -29,6 +30,7 @@ const MENU = {
     { to: '/invoices', label: 'Tagihan Saya' },
     { to: '/maintenance', label: 'Komplain' },
     { to: '/announcements', label: 'Pengumuman' },
+    { to: '/reviews', label: 'Reviews'},
   ],
 }
 
