@@ -17,6 +17,7 @@ import UserManagement from './pages/admin/UserManagement'
 import Reviews from './pages/admin/Reviews'
 import ProtectedRoute from './routes/ProtectedRoute'
 import AppLayout from './components/AppLayout'
+import TenantSettings from './pages/tenant/Settings'
 
 export default function App() {
   const { token, user, setUser, clearAuth } = useAuthStore()
@@ -64,6 +65,8 @@ export default function App() {
             <Route path="/maintenance" element={<MaintenanceSwitch />} />
             <Route path="/announcements" element={<AnnouncementsSwitch />} />
             <Route path="/reviews" element={<Reviews />} />
+            <Route path="/settings" element={<TenantSettings />} />
+            {/* 99TfAlRD */}
           </Route>
         </Route>
 

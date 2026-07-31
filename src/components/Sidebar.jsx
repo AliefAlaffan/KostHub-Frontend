@@ -31,6 +31,7 @@ const MENU = {
     { to: '/maintenance', label: 'Komplain' },
     { to: '/announcements', label: 'Pengumuman' },
     { to: '/reviews', label: 'Beri Ulasan' },
+    { to: '/settings', label: 'Pengaturan Akun' },
   ],
 }
 
