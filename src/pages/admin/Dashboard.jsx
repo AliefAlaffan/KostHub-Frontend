@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [occupancy, setOccupancy] = useState(null)
   const [revenue, setRevenue] = useState(null)
   const [outstanding, setOutstanding] = useState(null)
+   const [error, setError] = useState('')
 
   const [loading, setLoading] = useState(true)
 
@@ -38,6 +39,12 @@ export default function Dashboard() {
   return (
     <div>
       <Topbar title="Dashboard" breadcrumb={['KostHub', 'Dashboard']} />
+
+      {error && (
+        <div className="mx-8 mt-4 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-lg px-4 py-3">
+          {error}
+        </div>
+      )}
 
       <div className="p-8 max-w-[1300px]">
         <div className="relative overflow-hidden rounded-2xl bg-[var(--color-navy)] p-7 mb-6 text-white">

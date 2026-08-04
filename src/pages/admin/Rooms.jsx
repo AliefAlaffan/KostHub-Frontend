@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, DoorOpen, X } from 'lucide-react'
+import { Plus, DoorOpen, CheckCircle2, Wrench, XCircle, X } from 'lucide-react'
 import { getProperties } from '../../api/properties'
 import { getRooms, createRoom } from '../../api/rooms'
 import Topbar from '../../components/Topbar'
@@ -8,10 +8,10 @@ import Button from '../../components/ui/Button'
 import Skeleton from '../../components/ui/Skeleton'
 
 const STATUS_STYLE = {
-  available: { dot: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Tersedia' },
-  occupied: { dot: 'bg-indigo-500', bg: 'bg-indigo-50', text: 'text-indigo-700', label: 'Terisi' },
-  maintenance: { dot: 'bg-amber-500', bg: 'bg-amber-50', text: 'text-amber-700', label: 'Perbaikan' },
-  inactive: { dot: 'bg-slate-400', bg: 'bg-slate-50', text: 'text-slate-600', label: 'Non-aktif' },
+  available: { icon: CheckCircle2, iconBg: '#ECFDF5', iconFg: '#059669', badgeBg: '#ECFDF5', badgeFg: '#047857', label: 'Tersedia' },
+  occupied: { icon: DoorOpen, iconBg: '#EEF2FF', iconFg: '#4338CA', badgeBg: '#EEF2FF', badgeFg: '#3730A3', label: 'Terisi' },
+  maintenance: { icon: Wrench, iconBg: '#FFFBEB', iconFg: '#D97706', badgeBg: '#FFFBEB', badgeFg: '#92400E', label: 'Perbaikan' },
+  inactive: { icon: XCircle, iconBg: '#FAFAFA', iconFg: '#71717A', badgeBg: '#F4F4F5', badgeFg: '#52525B', label: 'Non-aktif' },
 }
 
 export default function Rooms() {
@@ -64,14 +64,14 @@ export default function Rooms() {
 
   return (
     <div>
-      <Topbar title="Kamar" subtitle="Kelola kamar dan pantau statusnya secara real-time" />
+      <Topbar title="Kamar" breadcrumb={['KostHub', 'Kamar']} />
 
-      <div className="p-8 max-w-[1400px] animate-in">
+      <div className="p-8 max-w-[1300px]">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <select
             value={selectedProperty}
             onChange={(e) => setSelectedProperty(e.target.value)}
-            className="bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-sm font-medium text-ink shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+            className="bg-white border border-[var(--color-border)] rounded-lg px-4 py-2.5 text-sm font-semibold text-ink focus:outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-sm"
           >
             {properties.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
@@ -80,45 +80,56 @@ export default function Rooms() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {summary.map((s) => {
             const style = STATUS_STYLE[s.status]
+            const Icon = style.icon
             return (
-              <div key={s.status} className="rounded-lg bg-white border border-slate-100 p-4 flex items-center gap-3 shadow-[var(--shadow-card)]">
-                <span className={`w-2.5 h-2.5 rounded-full ${style.dot} shrink-0`} />
-                <div>
-                  <div className="text-lg font-bold text-ink leading-none tabular-nums">{s.count}</div>
-                  <div className="text-xs font-medium text-slate-muted mt-1">{style.label}</div>
+              <Card key={s.status} className="p-4">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: style.iconBg }}>
+                  <Icon size={16} strokeWidth={2.2} style={{ color: style.iconFg }} />
                 </div>
-              </div>
+                <div className="font-display text-xl font-bold text-ink leading-none tabular-nums">{s.count}</div>
+                <div className="text-xs text-slate-muted mt-1.5">{style.label}</div>
+              </Card>
             )
           })}
         </div>
 
         {loading && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
-            {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-28" />)}
           </div>
         )}
 
         {!loading && Object.entries(roomsByFloor).sort(([a], [b]) => a - b).map(([floor, floorRooms]) => (
-          <div key={floor} className="mb-7">
-            <div className="text-xs font-bold text-slate-muted uppercase tracking-wider mb-3">Lantai {floor}</div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+          <div key={floor} className="mb-8">
+            <div className="flex items-center gap-2 mb-3.5">
+              <span className="text-[11px] font-bold text-slate-muted uppercase tracking-wider">Lantai {floor}</span>
+              <span className="text-[11px] text-slate-300">·</span>
+              <span className="text-[11px] text-slate-muted">{floorRooms.length} kamar</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {floorRooms.map((room) => {
                 const style = STATUS_STYLE[room.status]
                 return (
                   <div
                     key={room.id}
-                    className="group relative bg-white rounded-xl border border-slate-100 p-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer overflow-hidden"
+                    className="group bg-white rounded-xl border border-[var(--color-border)] p-4 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 hover:border-indigo-200 transition-all duration-200 cursor-pointer"
                   >
-                    <div className={`absolute inset-x-0 top-0 h-[3px] ${style.dot}`} />
-                    <div className="text-2xl font-bold text-ink tracking-tight tabular-nums mt-1">{room.room_number}</div>
-                    <div className={`inline-flex items-center gap-1.5 mt-2.5 px-2 py-0.5 rounded-full text-xs font-semibold ${style.bg} ${style.text}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-                      {style.label}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="font-mono text-2xl font-bold text-ink tracking-tight">{room.room_number}</div>
+                      <span
+                        className="text-[10px] font-bold px-2 py-1 rounded-full"
+                        style={{ backgroundColor: style.badgeBg, color: style.badgeFg }}
+                      >
+                        {style.label}
+                      </span>
                     </div>
-                    <div className="text-xs text-slate-muted mt-2">Rp {Number(room.price).toLocaleString('id-ID')}</div>
+                    <div className="text-[13px] font-semibold text-slate-600">
+                      Rp {Number(room.price).toLocaleString('id-ID')}
+                      <span className="text-slate-muted font-normal text-xs"> /bulan</span>
+                    </div>
                   </div>
                 )
               })}
@@ -128,7 +139,7 @@ export default function Rooms() {
 
         {!loading && rooms.length === 0 && (
           <Card className="p-10 text-center">
-            <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3">
+            <div className="w-12 h-12 rounded-full bg-[var(--color-paper)] flex items-center justify-center mx-auto mb-3">
               <DoorOpen size={22} className="text-slate-300" />
             </div>
             <p className="text-slate-muted text-sm">Belum ada kamar terdaftar di properti ini.</p>
@@ -138,19 +149,19 @@ export default function Rooms() {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 animate-in">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <Card className="w-full max-w-sm p-6 relative">
             <button onClick={() => setShowForm(false)} className="absolute top-4 right-4 text-slate-muted hover:text-ink transition-colors">
               <X size={18} />
             </button>
-            <h3 className="text-lg font-bold text-ink mb-5">Tambah Kamar</h3>
+            <h3 className="font-display text-lg font-bold text-ink mb-5">Tambah Kamar</h3>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-slate-muted mb-1.5">Nomor Kamar</label>
                 <input
                   value={form.room_number}
                   onChange={(e) => setForm({ ...form, room_number: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30" required
+                  className="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required
                 />
               </div>
               <div>
@@ -158,7 +169,7 @@ export default function Rooms() {
                 <input
                   type="number" value={form.floor}
                   onChange={(e) => setForm({ ...form, floor: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30" required
+                  className="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required
                 />
               </div>
               <div>
@@ -166,7 +177,7 @@ export default function Rooms() {
                 <input
                   type="number" value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30" required
+                  className="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20" required
                 />
               </div>
               <div>
@@ -174,7 +185,7 @@ export default function Rooms() {
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                  className="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 />
               </div>
               {error && <p className="text-sm text-rose-600">{error}</p>}
@@ -185,4 +196,4 @@ export default function Rooms() {
       )}
     </div>
   )
-}
+}   

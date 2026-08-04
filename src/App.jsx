@@ -18,26 +18,36 @@ import Reviews from './pages/admin/Reviews'
 import ProtectedRoute from './routes/ProtectedRoute'
 import AppLayout from './components/AppLayout'
 import TenantSettings from './pages/tenant/Settings'
+import TenantDetail from './pages/admin/TenantDetail'
 
 export default function App() {
   const { token, user, setUser, clearAuth } = useAuthStore()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Kalau ada token tapi data user belum ke-load (misal abis refresh halaman), ambil ulang dari backend
-    if (token && !user) {
-      getMe()
-        .then((data) => setUser(data))
-        .catch(() => clearAuth())
-        .finally(() => setLoading(false))
-    } else {
-      setLoading(false)
-    }
-  }, [token, user])
+  if (token && !user) {
+    getMe()
+      .then((data) => setUser(data))
+      .catch((err) => {
+        console.error('Gagal ambil data user:', err)
+        clearAuth()
+      })
+      .finally(() => setLoading(false))
+  } else {
+    setLoading(false)
+  }
+}, [token, user])
 
   if (loading) {
-    return <div className="p-10 text-center text-slate-muted">Memuat...</div>
-  }
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[var(--color-paper)]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-9 h-9 border-[3px] border-slate-200 border-t-[var(--color-brand)] rounded-full animate-spin" />
+        <span className="text-xs text-slate-muted font-medium tracking-wide">Memuat KostHub...</span>
+      </div>
+    </div>
+  )
+}
 
   return (
     <BrowserRouter>
@@ -52,6 +62,7 @@ export default function App() {
               <Route path="/rooms" element={<RoomsSwitch />} />
               <Route path="/tenants" element={<TenantsSwitch />} />
               <Route path="/contracts" element={<ContractsSwitch />} />
+              <Route path="/tenants/:id" element={<TenantDetail />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
