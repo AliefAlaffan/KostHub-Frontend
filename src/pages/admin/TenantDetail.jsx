@@ -175,7 +175,7 @@ export default function TenantDetail() {
           ) : (
             <p className="text-sm text-slate-muted">Belum ada riwayat sewa.</p>
           )}
-        </Card>g
+        </Card>
       </div>
     </div>
   )
