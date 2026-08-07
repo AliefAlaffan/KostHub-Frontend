@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react'
-import { useAuthStore } from '../../store/authStore'
+import { Star } from 'lucide-react'
 import { getProperties } from '../../api/properties'
-import { getReviews, createReview, replyReview } from '../../api/reviews'
+import { getReviews, replyReview } from '../../api/reviews'
+import Topbar from '../../components/Topbar'
+import Card from '../../components/ui/Card'
+import Button from '../../components/ui/Button'
+import Skeleton from '../../components/ui/Skeleton'
 
 export default function Reviews() {
-  const { user } = useAuthStore()
   const [properties, setProperties] = useState([])
   const [selectedProperty, setSelectedProperty] = useState('')
   const [reviews, setReviews] = useState([])
-  const [form, setForm] = useState({ rating: 5, comment: '' })
-  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
   const [replyText, setReplyText] = useState({})
+  const [error, setError] = useState('')
 
   useEffect(() => {
     getProperties().then((data) => {
@@ -19,77 +22,82 @@ export default function Reviews() {
     })
   }, [])
 
-  const loadReviews = (propertyId) => {
+  const load = (propertyId) => {
     if (!propertyId) return
-    getReviews(propertyId).then(setReviews)
+    setLoading(true)
+    getReviews(propertyId).then((data) => { setReviews(data); setLoading(false) })
   }
-  useEffect(() => { loadReviews(selectedProperty) }, [selectedProperty])
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    try {
-      await createReview(selectedProperty, form)
-      setForm({ rating: 5, comment: '' })
-      loadReviews(selectedProperty)
-    } catch (err) {
-      setError(err.response?.data?.message || 'Gagal mengirim ulasan')
-    }
-  }
+  useEffect(() => { load(selectedProperty) }, [selectedProperty])
 
   const handleReply = async (reviewId) => {
     setError('')
     try {
       await replyReview(reviewId, replyText[reviewId] || '')
-      loadReviews(selectedProperty)
+      load(selectedProperty)
     } catch (err) {
       setError(err.response?.data?.message || 'Gagal membalas')
     }
   }
 
   return (
-    <div style={{ padding: 40, fontFamily: 'sans-serif' }}>
-      <h1>Review & Ulasan</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <div>
+      <Topbar title="Review" breadcrumb={['KostHub', 'Review']} />
 
-      {user?.role !== 'tenant' && (
-        <>
-          <label>Properti: </label>
-          <select value={selectedProperty} onChange={(e) => setSelectedProperty(e.target.value)}>
-            {properties.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
-        </>
-      )}
+      <div className="p-8 max-w-[900px]">
+        <select
+          value={selectedProperty} onChange={(e) => setSelectedProperty(e.target.value)}
+          className="bg-white border border-[var(--color-border)] rounded-lg px-4 py-2.5 text-sm font-medium mb-6 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+        >
+          {properties.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+        </select>
 
-      {user?.role === 'tenant' && (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 320, margin: '16px 0' }}>
-          <label>Rating (1-5):</label>
-          <select value={form.rating} onChange={(e) => setForm({ ...form, rating: e.target.value })}>
-            {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
-          </select>
-          <textarea placeholder="Komentar (opsional)" value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} />
-          <button type="submit">Kirim Ulasan</button>
-        </form>
-      )}
+        {error && <p className="text-sm text-rose-600 mb-4">{error}</p>}
 
-      {reviews.map((r) => (
-        <div key={r.id} style={{ border: '1px solid #ccc', borderRadius: 6, padding: 12, marginBottom: 8 }}>
-          <strong>{r.tenant?.user?.name}</strong> — {'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}
-          <p>{r.comment}</p>
-          {r.owner_reply && <p style={{ background: '#f0f0f0', padding: 8 }}>Balasan pemilik: {r.owner_reply}</p>}
-
-          {user?.role === 'admin' && !r.owner_reply && (
-            <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
-              <input
-                placeholder="Tulis balasan..."
-                value={replyText[r.id] || ''}
-                onChange={(e) => setReplyText({ ...replyText, [r.id]: e.target.value })}
-              />
-              <button onClick={() => handleReply(r.id)}>Balas</button>
+        {loading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28" />)}
+          </div>
+        ) : reviews.length === 0 ? (
+          <Card className="p-10 text-center">
+            <div className="w-12 h-12 rounded-full bg-[var(--color-paper)] flex items-center justify-center mx-auto mb-3">
+              <Star size={22} className="text-slate-300" />
             </div>
-          )}
-        </div>
-      ))}
+            <p className="text-slate-muted text-sm">Belum ada ulasan untuk properti ini.</p>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {reviews.map((r) => (
+              <Card key={r.id} className="p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold text-ink text-sm">{r.tenant?.user?.name}</span>
+                  <div className="flex text-amber-400">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} size={14} fill={i < r.rating ? 'currentColor' : 'none'} strokeWidth={1.5} />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-sm text-slate-600 mb-3">{r.comment}</p>
+
+                {r.owner_reply ? (
+                  <div className="bg-[var(--color-paper)] rounded-lg p-3 text-sm text-slate-600">
+                    <span className="font-semibold text-ink">Balasan Anda: </span>{r.owner_reply}
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      placeholder="Tulis balasan..."
+                      value={replyText[r.id] || ''}
+                      onChange={(e) => setReplyText({ ...replyText, [r.id]: e.target.value })}
+                      className="flex-1 px-3 py-2 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    />
+                    <Button onClick={() => handleReply(r.id)}>Balas</Button>
+                  </div>
+                )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
