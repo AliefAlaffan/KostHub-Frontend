@@ -119,7 +119,10 @@ export default function Tenants() {
 
       {showForm && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto">
+         <div
+          className="w-full max-w-sm p-6 relative rounded-xl"
+          style={{ backgroundColor: '#FFFFFF', boxShadow: '0 20px 40px rgba(0,0,0,0.25)' }}
+        >
             <button
               onClick={() => { setShowForm(false); setSuccessInfo(null) }}
               className="absolute top-4 right-4 text-slate-muted hover:text-ink transition-colors"
@@ -203,7 +206,7 @@ export default function Tenants() {
                 </Button>
               </>
             )}
-          </Card>
+          </div>
         </div>
       )}
     </div>

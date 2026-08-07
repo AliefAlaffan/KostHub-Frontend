@@ -141,7 +141,10 @@ export default function Contracts() {
 
       {modal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-sm p-6 relative">
+          <div
+            className="w-full max-w-sm p-6 relative rounded-xl"
+            style={{ backgroundColor: '#FFFFFF', boxShadow: '0 20px 40px rgba(0,0,0,0.25)' }}
+          >
             <button onClick={closeModal} className="absolute top-4 right-4 text-slate-muted hover:text-ink transition-colors">
               <X size={18} />
             </button>
@@ -181,7 +184,7 @@ export default function Contracts() {
                 </form>
               </>
             )}
-          </Card>
+          </div>
         </div>
       )}
     </div>
