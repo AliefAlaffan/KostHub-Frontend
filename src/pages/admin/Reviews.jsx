@@ -43,7 +43,7 @@ export default function Reviews() {
     <div>
       <Topbar title="Review" breadcrumb={['KostHub', 'Review']} />
 
-      <div className="p-8 max-w-[900px]">
+      <div className="p-8 max-w-[1300px]">
         <select
           value={selectedProperty} onChange={(e) => setSelectedProperty(e.target.value)}
           className="bg-white border border-[var(--color-border)] rounded-lg px-4 py-2.5 text-sm font-medium mb-6 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
@@ -65,8 +65,8 @@ export default function Reviews() {
             <p className="text-slate-muted text-sm">Belum ada ulasan untuk properti ini.</p>
           </Card>
         ) : (
-          <div className="space-y-3">
-            {reviews.map((r) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+           {reviews.map((r) => (
               <Card key={r.id} className="p-5">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-semibold text-ink text-sm">{r.tenant?.user?.name}</span>
