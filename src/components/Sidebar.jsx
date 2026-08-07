@@ -3,7 +3,7 @@ import { useAuthStore } from '../store/authStore'
 import { logout } from '../api/auth'
 import {
   LayoutDashboard, Building2, DoorOpen, Users, FileText, Receipt,
-  Wrench, Megaphone, Star, BarChart3, UserCog, Settings, LogOut, ClipboardList, Send,
+  Wrench, Megaphone, Star, BarChart3, UserCog, Settings, LogOut, ClipboardList,
 } from 'lucide-react'
 
 const SECTIONS = {
@@ -67,7 +67,7 @@ export default function Sidebar() {
     <aside className="w-64 shrink-0 bg-[var(--color-navy)] flex flex-col h-screen sticky top-0">
       <div className="flex items-center gap-2.5 px-5 pt-6 pb-7">
         <div className="w-9 h-9 rounded-xl bg-[var(--color-brand)] flex items-center justify-center">
-          <Send size={16} className="text-white" strokeWidth={2.2} />
+          <Building2 size={16} className="text-white" strokeWidth={2.2} />
         </div>
         <div>
           <div className="font-display font-bold text-[15px] text-white leading-tight">
