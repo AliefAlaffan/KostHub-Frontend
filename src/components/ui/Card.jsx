@@ -1,3 +1,10 @@
 export default function Card({ children, className = '' }) {
-  return <div className={`bg-[var(--color-surface)] rounded-xl transition-shadow hover:shadow-[var(--shadow-card-hover)] ${className}`}>{children}</div>
+  return (
+    <div
+      className={`rounded-xl border border-[var(--color-border)] ${className}`}
+      style={{ backgroundColor: '#FFFFFF' }}
+    >
+      {children}
+    </div>
+  )
 }
