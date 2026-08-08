@@ -17,7 +17,6 @@ import UserManagement from './pages/admin/UserManagement'
 import Reviews from './pages/admin/Reviews'
 import ProtectedRoute from './routes/ProtectedRoute'
 import AppLayout from './components/AppLayout'
-import TenantSettings from './pages/tenant/Settings'
 import TenantDetail from './pages/admin/TenantDetail'
 import SettingsSwitch from './pages/SettingsSwitch'
 
@@ -70,7 +69,6 @@ export default function App() {
               <Route path="/properties" element={<Properties />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/users" element={<UserManagement />} />
-              <Route path="/settings" element={<SettingsSwitch />} />
             </Route>
 
             <Route path="/invoices" element={<InvoicesSwitch />} />
@@ -78,8 +76,7 @@ export default function App() {
             <Route path="/maintenance" element={<MaintenanceSwitch />} />
             <Route path="/announcements" element={<AnnouncementsSwitch />} />
             <Route path="/reviews" element={<Reviews />} />
-            <Route path="/settings" element={<TenantSettings />} />
-            {/* 99TfAlRD */}
+            <Route path="/settings" element={<SettingsSwitch />} />
           </Route>
         </Route>
 
