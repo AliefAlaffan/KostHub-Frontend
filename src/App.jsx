@@ -14,7 +14,7 @@ import AnnouncementsSwitch from './pages/AnnouncementsSwitch'
 import Properties from './pages/admin/Properties'
 import Reports from './pages/admin/Reports'
 import UserManagement from './pages/admin/UserManagement'
-import Reviews from './pages/admin/Reviews'
+import ReviewsSwitch from './pages/ReviewsSwitch'
 import ProtectedRoute from './routes/ProtectedRoute'
 import AppLayout from './components/AppLayout'
 import TenantDetail from './pages/admin/TenantDetail'
@@ -75,7 +75,7 @@ export default function App() {
             <Route path="/invoices/:id" element={<InvoiceDetailSwitch />} />
             <Route path="/maintenance" element={<MaintenanceSwitch />} />
             <Route path="/announcements" element={<AnnouncementsSwitch />} />
-            <Route path="/reviews" element={<Reviews />} />
+            <Route path="/reviews" element={<ReviewsSwitch />} />
             <Route path="/settings" element={<SettingsSwitch />} />
           </Route>
         </Route>
