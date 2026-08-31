@@ -90,22 +90,39 @@ export default function InvoiceDetail() {
         </Card>
 
         {['unpaid', 'partial', 'overdue'].includes(invoice.status) && (
-          <Card className="p-5">
-            <h3 className="text-sm font-bold text-ink mb-3">Bayar Sekarang</h3>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <input type="number" placeholder="Jumlah" value={form.amount}
-                onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputClass} required />
-              <select value={form.method} onChange={(e) => setForm({ ...form, method: e.target.value })} className={inputClass}>
-                <option value="transfer">Transfer</option>
-                <option value="ewallet">E-Wallet</option>
-              </select>
-              <input type="date" value={form.payment_date}
-                onChange={(e) => setForm({ ...form, payment_date: e.target.value })} className={inputClass} required />
-              {error && <p className="text-sm text-rose-600">{error}</p>}
-              {success && <p className="text-sm text-emerald-600">{success}</p>}
-              <Button type="submit" className="w-full">Kirim Bukti Pembayaran</Button>
-            </form>
-          </Card>
+          <>
+            {invoice.contract?.room?.property?.qris_image && (
+              <Card className="p-5 mb-4 text-center">
+                <h3 className="text-sm font-bold text-ink mb-3">Scan QRIS untuk Bayar</h3>
+                <img
+                  src={`http://localhost:8000/storage/${invoice.contract.room.property.qris_image}`}
+                  alt="QRIS Pembayaran"
+                  className="w-48 h-48 mx-auto rounded-lg border border-[var(--color-border)]"
+                />
+                <p className="text-xs text-slate-muted mt-3">
+                  Scan kode di atas menggunakan aplikasi e-wallet atau m-banking Anda, lalu isi form di
+                  bawah dan unggah bukti transfer.
+                </p>
+              </Card>
+            )}
+
+            <Card className="p-5">
+              <h3 className="text-sm font-bold text-ink mb-3">Bayar Sekarang</h3>
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <input type="number" placeholder="Jumlah" value={form.amount}
+                  onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputClass} required />
+                <select value={form.method} onChange={(e) => setForm({ ...form, method: e.target.value })} className={inputClass}>
+                  <option value="transfer">Transfer</option>
+                  <option value="ewallet">E-Wallet</option>
+                </select>
+                <input type="date" value={form.payment_date}
+                  onChange={(e) => setForm({ ...form, payment_date: e.target.value })} className={inputClass} required />
+                {error && <p className="text-sm text-rose-600">{error}</p>}
+                {success && <p className="text-sm text-emerald-600">{success}</p>}
+                <Button type="submit" className="w-full">Kirim Bukti Pembayaran</Button>
+              </form>
+            </Card>
+          </>
         )}
       </div>
     </div>

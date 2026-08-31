@@ -5,6 +5,8 @@ import Topbar from '../../components/Topbar'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Skeleton from '../../components/ui/Skeleton'
+import { QrCode, Upload, Trash2 } from 'lucide-react'
+import { uploadQris, deleteQris } from '../../api/properties'
 
 export default function Properties() {
   const [properties, setProperties] = useState([])
@@ -69,9 +71,11 @@ export default function Properties() {
                 <p className="text-xs text-slate-muted flex items-center gap-1.5 mb-2">
                   <MapPin size={12} /> {p.city}
                 </p>
-                <span className="inline-block text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--color-paper)] text-slate-600 capitalize">
+                <span className="inline-block text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--color-paper)] text-slate-600 capitalize mb-3">
                   {p.type}
                 </span>
+
+                <QrisManager property={p} onUpdated={load} />
               </Card>
             ))}
           </div>
@@ -103,6 +107,65 @@ export default function Properties() {
             </form>
           </div>
         </div>
+      )}
+    </div>
+  )
+}
+
+function QrisManager({ property, onUpdated }) {
+  const [uploading, setUploading] = useState(false)
+
+  const handleUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('qris_image', file)
+
+    try {
+      await uploadQris(property.id, formData)
+      onUpdated()
+    } catch (err) {
+      alert(err.response?.data?.message || 'Gagal upload QRIS')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!confirm('Hapus QRIS properti ini?')) return
+    await deleteQris(property.id)
+    onUpdated()
+  }
+
+  return (
+    <div className="border-t border-[var(--color-border)] pt-3 mt-1">
+      <div className="flex items-center gap-1.5 mb-2">
+        <QrCode size={13} className="text-slate-muted" />
+        <span className="text-xs font-semibold text-slate-600">QRIS Pembayaran</span>
+      </div>
+
+      {property.qris_image ? (
+        <div className="flex items-center gap-2">
+          <img
+            src={`http://localhost:8000/storage/${property.qris_image}`}
+            alt="QRIS"
+            className="w-14 h-14 rounded-lg border border-[var(--color-border)] object-cover"
+          />
+          <button
+            onClick={handleDelete}
+            className="text-xs text-rose-600 hover:text-rose-800 flex items-center gap-1"
+          >
+            <Trash2 size={12} /> Hapus
+          </button>
+        </div>
+      ) : (
+        <label className="flex items-center justify-center gap-1.5 border border-dashed border-[var(--color-border)] rounded-lg py-2.5 text-xs text-slate-muted cursor-pointer hover:bg-[var(--color-paper)] transition-colors">
+          <Upload size={13} />
+          {uploading ? 'Mengunggah...' : 'Upload QRIS'}
+          <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
+        </label>
       )}
     </div>
   )
