@@ -4,6 +4,7 @@ import apiClient from '../../api/client'
 import Topbar from '../../components/Topbar'
 import Card from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
+import { Download, FileSpreadsheet, FileText } from 'lucide-react'
 
 export default function Reports() {
   const [occupancy, setOccupancy] = useState(null)
@@ -25,10 +26,45 @@ export default function Reports() {
     { icon: TrendingDown, bg: '#FEF2F2', fg: '#BE123C', label: 'Total Pengeluaran', value: `Rp ${Number(expenses?.total_expenses ?? 0).toLocaleString('id-ID')}` },
   ]
 
+  const handleExport = (format, type = 'revenue') => {
+    const token = localStorage.getItem('auth_token')
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+    const url = format === 'excel'
+      ? `${baseUrl}/reports/export/excel?type=${type}`
+      : `${baseUrl}/reports/export/pdf`
+
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.blob())
+      .then((blob) => {
+        const link = document.createElement('a')
+        link.href = window.URL.createObjectURL(blob)
+        link.download = format === 'excel' ? `laporan-${type}.xlsx` : 'laporan-ringkasan.pdf'
+        link.click()
+      })
+  }
+
   return (
     <div>
-      <Topbar title="Laporan" breadcrumb={['KostHub', 'Laporan']} />
-
+      <Topbar
+  title="Laporan"
+  breadcrumb={['KostHub', 'Laporan']}
+  actions={
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => handleExport('excel', 'revenue')}
+        className="flex items-center gap-1.5 text-xs font-semibold pl-2 pr-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+      >
+        <FileSpreadsheet size={14} /> Excel
+      </button>
+      <button
+        onClick={() => handleExport('pdf')}
+        className="flex items-center gap-1.5 text-xs font-semibold pl-2 pr-3 py-2 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
+      >
+        <FileText size={14} /> PDF
+      </button>
+    </div>
+  }
+/>
       <div className="p-8 max-w-[1300px]">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {stats.map((s) => {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '../store/authStore'
 
-export default function Topbar({ title, breadcrumb }) {
+export default function Topbar({ title, breadcrumb, actions }) {
   const { user } = useAuthStore()
   const [time, setTime] = useState(new Date())
 
@@ -28,7 +28,8 @@ export default function Topbar({ title, breadcrumb }) {
           </div>
         )}
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        {actions}
         <span className="text-sm text-slate-muted tabular-nums">{timeStr}</span>
         <div className="w-9 h-9 rounded-xl bg-[var(--color-brand)] flex items-center justify-center text-white text-xs font-bold">
           {initials}
