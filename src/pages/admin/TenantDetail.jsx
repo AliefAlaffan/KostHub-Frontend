@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Phone, Mail, IdCard, Briefcase, PhoneCall, FileText } from 'lucide-react'
-import { getTenant } from '../../api/tenants'
+import { ArrowLeft, Phone, Mail, IdCard, Briefcase, PhoneCall, FileText, Upload, Trash2 } from 'lucide-react'
+import { getTenant, uploadTenantDocument, deleteTenantDocument } from '../../api/tenants'
 import Topbar from '../../components/Topbar'
 import Card from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
@@ -12,12 +12,14 @@ export default function TenantDetail() {
   const [tenant, setTenant] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const load = () => {
     getTenant(id).then((data) => {
       setTenant(data)
       setLoading(false)
     })
-  }, [id])
+  }
+
+  useEffect(() => { load() }, [id])
 
   if (loading) {
     return (
@@ -50,6 +52,12 @@ export default function TenantDetail() {
   const activeContract = tenant.contracts?.find(
     (c) => c.status === 'active' || c.status === 'ending_soon'
   )
+
+  const handleDeleteDocument = async (documentId) => {
+    if (!confirm('Hapus dokumen ini?')) return
+    await deleteTenantDocument(tenant.id, documentId)
+    load()
+  }
 
   return (
     <div>
@@ -176,7 +184,99 @@ export default function TenantDetail() {
             <p className="text-sm text-slate-muted">Belum ada riwayat sewa.</p>
           )}
         </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display text-sm font-bold text-ink">Dokumen</h3>
+            <DocumentUploadButton tenantId={tenant.id} onUploaded={load} />
+          </div>
+
+          {tenant.documents?.length ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {tenant.documents.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="flex items-center gap-2.5 bg-[var(--color-paper)] rounded-lg p-3 group relative"
+                >
+                  <a
+                    href={`http://localhost:8000/storage/${doc.file_path}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2.5 flex-1 min-w-0"
+                  >
+                    <FileText size={16} className="text-slate-muted shrink-0" />
+                    <span className="text-xs font-medium text-ink uppercase truncate">{doc.doc_type}</span>
+                  </a>
+                  <button
+                    onClick={() => handleDeleteDocument(doc.id)}
+                    className="text-slate-300 hover:text-rose-600 transition-colors shrink-0"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-muted">Belum ada dokumen diunggah.</p>
+          )}
+        </Card>
       </div>
+    </div>
+  )
+}
+
+function DocumentUploadButton({ tenantId, onUploaded }) {
+  const [uploading, setUploading] = useState(false)
+  const [docType, setDocType] = useState('ktp')
+  const [showPicker, setShowPicker] = useState(false)
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('doc_type', docType)
+    formData.append('file', file)
+
+    try {
+      await uploadTenantDocument(tenantId, formData)
+      onUploaded()
+    } catch (err) {
+      alert(err.response?.data?.message || 'Gagal upload dokumen')
+    } finally {
+      setUploading(false)
+      setShowPicker(false)
+    }
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setShowPicker(!showPicker)}
+        className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+      >
+        <Upload size={13} /> {uploading ? 'Mengunggah...' : 'Upload Dokumen'}
+      </button>
+
+      {showPicker && (
+        <div className="absolute right-0 top-6 bg-white rounded-lg border border-[var(--color-border)] shadow-lg p-3 z-10 w-48">
+          <label className="block text-xs font-medium text-slate-muted mb-1.5">Jenis Dokumen</label>
+          <select
+            value={docType}
+            onChange={(e) => setDocType(e.target.value)}
+            className="w-full px-2 py-1.5 border border-[var(--color-border)] rounded-md text-xs mb-2"
+          >
+            <option value="ktp">KTP</option>
+            <option value="kk">KK</option>
+            <option value="other">Lainnya</option>
+          </select>
+          <label className="block w-full text-center bg-indigo-600 text-white rounded-md py-1.5 text-xs font-semibold cursor-pointer hover:bg-indigo-700">
+            Pilih File
+            <input type="file" accept=".jpg,.jpeg,.png,.pdf" onChange={handleFileChange} className="hidden" />
+          </label>
+        </div>
+      )}
     </div>
   )
 }
