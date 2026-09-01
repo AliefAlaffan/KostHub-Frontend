@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, User, X, KeyRound, Copy, Check } from 'lucide-react'
+import { Plus, User, X, KeyRound, Copy, Check, Search} from 'lucide-react'
 import { getProperties } from '../../api/properties'
 import { getRooms } from '../../api/rooms'
 import { getTenants, createTenant } from '../../api/tenants'
@@ -23,6 +23,8 @@ export default function Tenants() {
   const [error, setError] = useState('')
   const [successInfo, setSuccessInfo] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [selectedPropertyFilter, setSelectedPropertyFilter] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')  
 
   useEffect(() => {
     getProperties().then((data) => {
@@ -34,8 +36,12 @@ export default function Tenants() {
 
   const loadTenants = () => {
     setLoading(true)
-    getTenants().then((data) => { setTenants(data); setLoading(false) })
+    getTenants({
+      property_id: selectedPropertyFilter || undefined,
+      search: searchQuery || undefined,
+    }).then((data) => { setTenants(data); setLoading(false) })
   }
+  useEffect(() => { loadTenants() }, [selectedPropertyFilter, searchQuery])
 
   useEffect(() => {
     if (!selectedProperty) return
@@ -75,9 +81,28 @@ export default function Tenants() {
       <Topbar title="Penghuni" breadcrumb={['KostHub', 'Penghuni']} />
 
       <div className="p-8 max-w-[1300px]">
-        <div className="flex items-center justify-between mb-6">
-          <div className="text-sm text-slate-muted">{tenants.length} penghuni terdaftar</div>
-          <Button onClick={() => setShowForm(true)}>
+        <div className="flex items-center gap-3 flex-wrap mb-6">
+          <select
+            value={selectedPropertyFilter}
+            onChange={(e) => setSelectedPropertyFilter(e.target.value)}
+            className="bg-white border border-[var(--color-border)] rounded-lg px-4 py-2.5 text-sm font-medium text-ink focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          >
+            <option value="">Semua Properti</option>
+            {properties.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+
+          <div className="flex items-center gap-2 bg-white border border-[var(--color-border)] rounded-lg px-3 py-2.5 flex-1 min-w-[200px] max-w-xs focus-within:ring-2 focus-within:ring-indigo-500/30 focus-within:border-indigo-500 transition-all">
+            <Search size={15} className="text-slate-muted shrink-0" />
+            <input
+              placeholder="Cari nama atau nomor kamar..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent text-sm w-full placeholder:text-slate-muted"
+              style={{ outline: 'none' }}
+            />
+          </div>
+
+          <Button onClick={() => setShowForm(true)} className="ml-auto">
             <span className="flex items-center gap-2"><Plus size={16} /> Tambah Penghuni</span>
           </Button>
         </div>
@@ -105,9 +130,13 @@ export default function Tenants() {
                   <div className="min-w-0">
                     <div className="text-sm font-semibold text-ink truncate">{t.user?.name}</div>
                     <div className="text-xs text-slate-muted">
-                      {t.active_contract?.room?.room_number
-                        ? `Kamar ${t.active_contract.room.room_number}`
-                        : 'Tidak ada kamar aktif'}
+                      {t.active_contract?.room ? (
+                        <>
+                          {t.active_contract.room.property?.name} — Kamar {t.active_contract.room.room_number}
+                        </>
+                      ) : (
+                        'Tidak ada kamar aktif'
+                      )}
                     </div>
                   </div>
                 </Card>
