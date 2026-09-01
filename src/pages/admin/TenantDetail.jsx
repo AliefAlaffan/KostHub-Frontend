@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Phone, Mail, IdCard, Briefcase, PhoneCall, FileText, Upload, Trash2 } from 'lucide-react'
+import { ArrowLeft, Phone, Mail, IdCard, Briefcase, PhoneCall, FileText, Upload, Trash2, Building2 } from 'lucide-react'
 import { getTenant, uploadTenantDocument, deleteTenantDocument } from '../../api/tenants'
 import Topbar from '../../components/Topbar'
 import Card from '../../components/ui/Card'
@@ -82,6 +82,19 @@ export default function TenantDetail() {
                 <h2 className="font-display text-xl font-bold text-ink">{tenant.user?.name}</h2>
                 {activeContract && <Badge status={activeContract.status} />}
               </div>
+
+              {activeContract?.room ? (
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Building2 size={14} className="text-indigo-600" />
+                  <span className="text-sm font-semibold text-indigo-600">
+                    {activeContract.room.property?.name || 'Properti tidak diketahui'}
+                  </span>
+                  <span className="text-sm text-slate-muted">— Kamar {activeContract.room.room_number}</span>
+                </div>
+              ) : (
+                <div className="text-sm text-slate-muted mb-2">Tidak sedang menyewa kamar aktif</div>
+              )}
+
               <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-slate-muted mt-2">
                 <span className="flex items-center gap-1.5">
                   <Mail size={14} />
@@ -107,6 +120,12 @@ export default function TenantDetail() {
             <h3 className="font-display text-sm font-bold text-ink mb-4">Kontrak Aktif</h3>
             {activeContract ? (
               <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-xs text-slate-muted mb-1">Properti</div>
+                  <div className="text-sm font-semibold text-ink">
+                    {activeContract.room?.property?.name || '-'}
+                  </div>
+                </div>
                 <div>
                   <div className="text-xs text-slate-muted mb-1">Kamar</div>
                   <div className="text-sm font-semibold text-ink">
@@ -157,6 +176,7 @@ export default function TenantDetail() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-[11px] text-slate-muted uppercase tracking-wide border-b border-[var(--color-border)]">
+                  <th className="pb-2.5 font-semibold">Properti</th>
                   <th className="pb-2.5 font-semibold">Kamar</th>
                   <th className="pb-2.5 font-semibold">Periode</th>
                   <th className="pb-2.5 font-semibold">Sewa</th>
@@ -166,6 +186,7 @@ export default function TenantDetail() {
               <tbody>
                 {tenant.contracts.map((c) => (
                   <tr key={c.id} className="border-b border-[var(--color-border)] last:border-0">
+                    <td className="py-2.5 text-slate-600">{c.room?.property?.name || '-'}</td>
                     <td className="py-2.5 text-ink font-medium">Kamar {c.room?.room_number}</td>
                     <td className="py-2.5 text-slate-600">
                       {c.start_date} — {c.end_date}
