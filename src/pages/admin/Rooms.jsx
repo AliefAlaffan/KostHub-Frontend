@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Plus, DoorOpen, CheckCircle2, Wrench, XCircle, X } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Plus, DoorOpen, CheckCircle2, Wrench, XCircle, X, User, Calendar, Wallet, Pencil, Check } from 'lucide-react'
 import { getProperties } from '../../api/properties'
 import { getRooms, createRoom } from '../../api/rooms'
 import Topbar from '../../components/Topbar'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Skeleton from '../../components/ui/Skeleton'
-import { Link } from 'react-router-dom'
-import { getRoom } from '../../api/rooms'
-import { User, Calendar, Wallet } from 'lucide-react'
+import { getRoom, updateRoom } from '../../api/rooms'
+
 
 const STATUS_STYLE = {
   available: { icon: CheckCircle2, iconBg: '#ECFDF5', iconFg: '#059669', badgeBg: '#ECFDF5', badgeFg: '#047857', label: 'Tersedia' },
@@ -28,6 +28,9 @@ export default function Rooms() {
   const [selectedRoom, setSelectedRoom] = useState(null)
   const [roomDetail, setRoomDetail] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const [editMode, setEditMode] = useState(false)
+  const [editForm, setEditForm] = useState({ price: '', description: '' })
+  const [editError, setEditError] = useState('')
 
   useEffect(() => {
     getProperties().then((data) => {
@@ -71,14 +74,30 @@ export default function Rooms() {
   const openRoomDetail = async (room) => {
     setSelectedRoom(room)
     setDetailLoading(true)
+    setEditMode(false)
     const data = await getRoom(room.id)
     setRoomDetail(data)
+    setEditForm({ price: data.price, description: data.description || '' })
     setDetailLoading(false)
   }
 
   const closeRoomDetail = () => {
     setSelectedRoom(null)
     setRoomDetail(null)
+    setEditMode(false)
+  }
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault()
+    setEditError('')
+    try {
+      const updated = await updateRoom(roomDetail.id, editForm)
+      setRoomDetail({ ...roomDetail, ...updated })
+      setEditMode(false)
+      loadRooms(selectedProperty)
+    } catch (err) {
+      setEditError(err.response?.data?.message || 'Gagal menyimpan perubahan')
+    }
   }
 
   return (
@@ -135,21 +154,22 @@ export default function Rooms() {
                   <div
                     key={room.id}
                     onClick={() => openRoomDetail(room)}
-                    className="relative bg-white rounded-xl border border-[var(--color-border)] pl-4 pr-3.5 py-3.5 flex items-center gap-3 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer overflow-hidden"
+                    className="relative bg-white rounded-xl border border-[var(--color-border)] p-4 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer overflow-hidden"
                   >
+                    <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ backgroundColor: style.dot }} />
                     <div className="flex items-start justify-between mb-3">
-                      <div className="font-mono text-2xl font-bold text-ink tracking-tight">{room.room_number}</div>
+                      <span className="font-mono text-xl font-bold text-ink tracking-tight">{room.room_number}</span>
                       <span
-                        className="text-[10px] font-bold px-2 py-1 rounded-full"
-                        style={{ backgroundColor: style.badgeBg, color: style.badgeFg }}
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
+                        style={{ backgroundColor: style.badgeBg || style.bg, color: style.badgeFg || style.text }}
                       >
                         {style.label}
                       </span>
                     </div>
-                    <div className="text-[13px] font-semibold text-slate-600">
+                    <div className="text-sm font-semibold text-ink">
                       Rp {Number(room.price).toLocaleString('id-ID')}
-                      <span className="text-slate-muted font-normal text-xs"> /bulan</span>
                     </div>
+                    <div className="text-[11px] text-slate-muted">per bulan</div>
                   </div>
                 )
               })}
@@ -169,75 +189,121 @@ export default function Rooms() {
       </div>
 
       {selectedRoom && (
+      <div
+        className="fixed inset-0 flex items-center justify-center z-50 p-4"
+        style={{ backgroundColor: 'rgba(10,11,15,0.6)', backdropFilter: 'blur(6px)' }}
+        onClick={closeRoomDetail}
+      >
         <div
-          className="fixed inset-0 flex items-center justify-center z-50 p-4"
-          style={{ backgroundColor: 'rgba(10,11,15,0.6)', backdropFilter: 'blur(6px)' }}
-          onClick={closeRoomDetail}
+          className="w-full max-w-sm p-6 relative rounded-xl"
+          style={{ backgroundColor: '#FFFFFF', boxShadow: '0 20px 40px rgba(0,0,0,0.25)' }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <div
-            className="w-full max-w-sm p-6 relative rounded-xl"
-            style={{ backgroundColor: '#FFFFFF', boxShadow: '0 20px 40px rgba(0,0,0,0.25)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button onClick={closeRoomDetail} className="absolute top-4 right-4 text-slate-muted hover:text-ink">
-              <X size={18} />
-            </button>
+          <button onClick={closeRoomDetail} className="absolute top-4 right-4 text-slate-muted hover:text-ink">
+            <X size={18} />
+          </button>
 
-            {detailLoading || !roomDetail ? (
-              <div className="py-8 text-center text-sm text-slate-muted">Memuat...</div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-mono text-2xl font-bold text-ink">{roomDetail.room_number}</span>
-                  {(() => {
-                    const style = STATUS_STYLE[roomDetail.status]
-                    return (
-                      <span
-                        className="text-[10px] font-bold px-2 py-1 rounded-full"
-                        style={{ backgroundColor: style.bg, color: style.text }}
-                      >
-                        {style.label}
-                      </span>
-                    )
-                  })()}
+          {detailLoading || !roomDetail ? (
+            <div className="py-8 text-center text-sm text-slate-muted">Memuat...</div>
+          ) : editMode ? (
+            <>
+              <h3 className="font-display text-lg font-bold text-ink mb-1">Edit Kamar {roomDetail.room_number}</h3>
+              <p className="text-xs text-slate-muted mb-4">Ubah harga sewa atau deskripsi kamar.</p>
+              <form onSubmit={handleEditSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-muted mb-1.5">Harga Sewa</label>
+                  <input
+                    type="number"
+                    value={editForm.price}
+                    onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    required
+                  />
                 </div>
-                <p className="text-xs text-slate-muted mb-4">Lantai {roomDetail.floor}</p>
+                <div>
+                  <label className="block text-xs font-medium text-slate-muted mb-1.5">Deskripsi</label>
+                  <textarea
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+                {editError && <p className="text-sm text-rose-600">{editError}</p>}
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => setEditMode(false)} className="flex-1">
+                    Batal
+                  </Button>
+                  <Button type="submit" className="flex-1">
+                    <span className="flex items-center justify-center gap-1.5"><Check size={14} /> Simpan</span>
+                  </Button>
+                </div>
+              </form>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-mono text-2xl font-bold text-ink">{roomDetail.room_number}</span>
+                {(() => {
+                  const style = STATUS_STYLE[roomDetail.status]
+                  return (
+                    <span
+                      className="text-[10px] font-bold px-2 py-1 rounded-full"
+                      style={{ backgroundColor: style.badgeBg || style.bg, color: style.badgeFg || style.text }}
+                    >
+                      {style.label}
+                    </span>
+                  )
+                })()}
+              </div>
+              <p className="text-xs text-slate-muted mb-4">Lantai {roomDetail.floor}</p>
 
-                <div className="flex items-center gap-2 text-sm text-slate-600 mb-5">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2 text-sm text-slate-600">
                   <Wallet size={14} className="text-slate-muted" />
                   Rp {Number(roomDetail.price).toLocaleString('id-ID')} / bulan
                 </div>
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                >
+                  <Pencil size={12} /> Edit
+                </button>
+              </div>
 
-                {roomDetail.active_contract ? (
-                  <div className="bg-[var(--color-paper)] rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <User size={14} className="text-indigo-600" />
-                      <span className="text-xs font-bold text-ink uppercase tracking-wide">Penghuni Saat Ini</span>
-                    </div>
-                    <div className="text-sm font-semibold text-ink mb-1">
-                      {roomDetail.active_contract.tenant?.user?.name}
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-muted mb-3">
-                      <Calendar size={12} />
-                      {roomDetail.active_contract.start_date} — {roomDetail.active_contract.end_date}
-                    </div>
-                    <Link
-                      to={`/tenants/${roomDetail.active_contract.tenant?.id}`}
-                      className="block text-center bg-indigo-600 text-white rounded-lg py-2 text-xs font-semibold hover:bg-indigo-700 transition-colors"
-                    >
-                      Lihat Detail Penghuni
-                    </Link>
+              {roomDetail.description && (
+                <p className="text-xs text-slate-500 mb-4 -mt-2">{roomDetail.description}</p>
+              )}
+
+              {roomDetail.active_contract ? (
+                <div className="bg-[var(--color-paper)] rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <User size={14} className="text-indigo-600" />
+                    <span className="text-xs font-bold text-ink uppercase tracking-wide">Penghuni Saat Ini</span>
                   </div>
-                ) : (
-                  <div className="bg-[var(--color-paper)] rounded-lg p-4 text-center">
-                    <p className="text-sm text-slate-muted">Kamar ini sedang kosong.</p>
+                  <div className="text-sm font-semibold text-ink mb-1">
+                    {roomDetail.active_contract.tenant?.user?.name}
                   </div>
-                )}
-              </>
-            )}
-          </div>
+                  <div className="flex items-center gap-1.5 text-xs text-slate-muted mb-3">
+                    <Calendar size={12} />
+                    {roomDetail.active_contract.start_date} — {roomDetail.active_contract.end_date}
+                  </div>
+                  <Link
+                    to={`/tenants/${roomDetail.active_contract.tenant?.id}`}
+                    className="block text-center bg-indigo-600 text-white rounded-lg py-2 text-xs font-semibold hover:bg-indigo-700 transition-colors"
+                  >
+                    Lihat Detail Penghuni
+                  </Link>
+                </div>
+              ) : (
+                <div className="bg-[var(--color-paper)] rounded-lg p-4 text-center">
+                  <p className="text-sm text-slate-muted">Kamar ini sedang kosong.</p>
+                </div>
+              )}
+            </>
+          )}
         </div>
-      )}
+      </div>
+    )}
 
       {showForm && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
