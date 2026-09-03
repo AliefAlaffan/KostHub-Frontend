@@ -11,3 +11,5 @@ export const uploadTenantDocument = (tenantId, formData) =>
 
 export const deleteTenantDocument = (tenantId, documentId) =>
   apiClient.delete(`/tenants/${tenantId}/documents/${documentId}`).then((res) => res.data)
+
+export const deleteTenant = (id) => apiClient.delete(`/tenants/${id}`).then((res) => res.data)

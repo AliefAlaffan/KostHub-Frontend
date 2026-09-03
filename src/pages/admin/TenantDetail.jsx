@@ -1,16 +1,22 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Phone, Mail, IdCard, Briefcase, PhoneCall, FileText, Upload, Trash2, Building2 } from 'lucide-react'
-import { getTenant, uploadTenantDocument, deleteTenantDocument } from '../../api/tenants'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Phone, Mail, IdCard, Briefcase, PhoneCall, FileText, Upload, Trash2, Building2, Trash2 as TrashIcon } from 'lucide-react'
+import { getTenant, uploadTenantDocument, deleteTenantDocument, deleteTenant } from '../../api/tenants'
 import Topbar from '../../components/Topbar'
 import Card from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
 import Skeleton from '../../components/ui/Skeleton'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
 
 export default function TenantDetail() {
   const { id } = useParams()
   const [tenant, setTenant] = useState(null)
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
+  const [deleteError, setDeleteError] = useState('')
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [documentToDelete, setDocumentToDelete] = useState(null)
 
   const load = () => {
     getTenant(id).then((data) => {
@@ -53,11 +59,32 @@ export default function TenantDetail() {
     (c) => c.status === 'active' || c.status === 'ending_soon'
   )
 
-  const handleDeleteDocument = async (documentId) => {
-    if (!confirm('Hapus dokumen ini?')) return
-    await deleteTenantDocument(tenant.id, documentId)
-    load()
+  const handleDeleteDocument = (documentId) => {
+  setDocumentToDelete(documentId)
+}
+
+const confirmDeleteDocument = async () => {
+  await deleteTenantDocument(tenant.id, documentToDelete)
+  setDocumentToDelete(null)
+  load()
+}
+
+  const handleDeleteTenant = () => {
+  setShowDeleteConfirm(true)
+}
+
+const confirmDeleteTenant = async () => {
+  setDeleting(true)
+  setDeleteError('')
+  try {
+    await deleteTenant(tenant.id)
+    navigate('/tenants')
+  } catch (err) {
+    setDeleteError(err.response?.data?.message || 'Gagal menghapus penghuni')
+    setDeleting(false)
+    setShowDeleteConfirm(false)
   }
+}
 
   return (
     <div>
@@ -72,7 +99,15 @@ export default function TenantDetail() {
           Kembali ke Penghuni
         </Link>
 
-        <Card className="p-6 mb-4">
+        <Card className="p-6 mb-4 relative">
+          <button
+            onClick={handleDeleteTenant}
+            disabled={deleting}
+            className="absolute top-5 right-5 flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-800 transition-colors disabled:opacity-50"
+          >
+            <TrashIcon size={13} /> {deleting ? 'Menghapus...' : 'Hapus Penghuni'}
+          </button>
+
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-brand)]/10 text-[var(--color-brand)] flex items-center justify-center text-xl font-bold shrink-0">
               {initials}
@@ -114,6 +149,12 @@ export default function TenantDetail() {
             </div>
           </div>
         </Card>
+
+        {deleteError && (
+          <div className="bg-rose-50 text-rose-700 text-sm rounded-lg px-4 py-3 mb-4">
+            {deleteError}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
           <Card className="lg:col-span-2 p-6">
@@ -242,7 +283,25 @@ export default function TenantDetail() {
           )}
         </Card>
       </div>
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Hapus Penghuni?"
+        message={`Yakin ingin menghapus "${tenant.user?.name}"? Tindakan ini tidak bisa dibatalkan.`}
+        confirmLabel="Ya, Hapus"
+        loading={deleting}
+        onConfirm={confirmDeleteTenant}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
+      <ConfirmDialog
+        open={!!documentToDelete}
+        title="Hapus Dokumen?"
+        message="Dokumen yang dihapus tidak bisa dikembalikan."
+        confirmLabel="Ya, Hapus"
+        onConfirm={confirmDeleteDocument}
+        onCancel={() => setDocumentToDelete(null)}
+      />
     </div>
+    
   )
 }
 
