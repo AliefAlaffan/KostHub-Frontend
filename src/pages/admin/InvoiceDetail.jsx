@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Receipt, Check, X as XIcon } from 'lucide-react'
+import { ArrowLeft, Check, X as XIcon } from 'lucide-react'
 import { getInvoice } from '../../api/invoices'
 import { createPayment, verifyPayment, rejectPayment } from '../../api/payments'
 import Topbar from '../../components/Topbar'
@@ -8,6 +8,11 @@ import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Skeleton from '../../components/ui/Skeleton'
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+}
 
 export default function InvoiceDetail() {
   const { id } = useParams()
@@ -84,6 +89,8 @@ export default function InvoiceDetail() {
     )
   }
 
+  const tenantName = invoice.contract?.tenant?.user?.name
+
   return (
     <div>
       <Topbar title="Detail Tagihan" breadcrumb={['KostHub', 'Tagihan', invoice.period]} />
@@ -94,14 +101,14 @@ export default function InvoiceDetail() {
         </Link>
 
         <Card className="p-6 mb-4">
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between mb-4">
             <div>
               <div className="flex items-center gap-2.5 mb-1">
                 <h2 className="font-display text-xl font-bold text-ink">Invoice {invoice.period}</h2>
                 <Badge status={invoice.status} />
               </div>
               <p className="text-sm text-slate-muted">
-                {invoice.contract?.tenant?.user?.name} · Kamar {invoice.contract?.room?.room_number}
+                {tenantName || 'Data penghuni terhapus'} · Kamar {invoice.contract?.room?.room_number ?? '-'}
               </p>
             </div>
             <div className="text-right">
@@ -110,6 +117,9 @@ export default function InvoiceDetail() {
                 Rp {Number(invoice.total_amount).toLocaleString('id-ID')}
               </div>
             </div>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-slate-muted pt-3 border-t border-[var(--color-border)]">
+            Jatuh tempo: <span className="font-semibold text-ink">{formatDate(invoice.due_date)}</span>
           </div>
         </Card>
 
@@ -148,7 +158,7 @@ export default function InvoiceDetail() {
                 <div key={p.id} className="flex items-center justify-between py-2.5 border-b border-[var(--color-border)] last:border-0">
                   <div>
                     <div className="text-sm font-medium text-ink">Rp {Number(p.amount).toLocaleString('id-ID')}</div>
-                    <div className="text-xs text-slate-muted">{p.payment_date} · {p.method}</div>
+                    <div className="text-xs text-slate-muted">{formatDate(p.payment_date)} · {p.method}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge status={p.status} />
