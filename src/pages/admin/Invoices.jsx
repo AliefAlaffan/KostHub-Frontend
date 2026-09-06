@@ -10,6 +10,7 @@ import Skeleton from '../../components/ui/Skeleton'
 
 const FILTERS = [
   { key: 'all', label: 'Semua' },
+  { key: 'pending_confirmation', label: 'Menunggu Konfirmasi' },
   { key: 'unpaid', label: 'Belum Dibayar' },
   { key: 'partial', label: 'Sebagian' },
   { key: 'paid', label: 'Lunas' },
@@ -19,6 +20,14 @@ const FILTERS = [
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function getDisplayStatus(invoice) {
+  const hasPending = invoice.payments?.some((p) => p.status === 'pending')
+  if (hasPending && ['unpaid', 'partial', 'overdue'].includes(invoice.status)) {
+    return 'pending_confirmation'
+  }
+  return invoice.status
 }
 
 export default function Invoices() {
@@ -63,7 +72,9 @@ export default function Invoices() {
     }
   }
 
-  const filteredInvoices = filter === 'all' ? invoices : invoices.filter((inv) => inv.status === filter)
+  const filteredInvoices = filter === 'all'
+  ? invoices
+  : invoices.filter((inv) => getDisplayStatus(inv) === filter)
   const inputClass = "w-full px-3 py-2.5 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
 
   const totalOutstanding = invoices
@@ -180,7 +191,7 @@ export default function Invoices() {
                       <td className="px-5 py-3.5 text-slate-600 font-mono">{inv.period}</td>
                       <td className="px-5 py-3.5 text-ink font-semibold">Rp {Number(inv.total_amount).toLocaleString('id-ID')}</td>
                       <td className="px-5 py-3.5 text-slate-600">{formatDate(inv.due_date)}</td>
-                      <td className="px-5 py-3.5"><Badge status={inv.status} /></td>
+                      <td className="px-5 py-3.5"><Badge status={getDisplayStatus(inv)} /></td>
                     </tr>
                   )
                 })}

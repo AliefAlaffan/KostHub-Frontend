@@ -18,6 +18,7 @@ const STATUS_MAP = {
   in_progress: { label: 'Diproses', color: '#4F46E5', bg: '#EEF2FF' },
   done: { label: 'Selesai', color: '#16A34A', bg: '#F0FDF4' },
   closed: { label: 'Ditutup', color: '#6B7280', bg: '#F9FAFB' },
+  pending_confirmation: { label: 'Menunggu Konfirmasi', color: '#4338CA', bg: '#EEF2FF' },
 }
 
 export default function Badge({ status }) {
