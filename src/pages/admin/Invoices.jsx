@@ -51,26 +51,25 @@ export default function Invoices() {
   }, [])
 
   const handleGenerate = async (e) => {
-    e.preventDefault()
-    setError('')
-    const tenant = tenants.find((t) => t.id === Number(selectedTenant))
-    const contractId = tenant?.active_contract?.id
+  e.preventDefault()
+  setError('')
+  const tenant = tenants.find((t) => t.id === Number(selectedTenant))
+  const contractId = tenant?.active_contract?.id
 
-    if (!contractId) {
-      setError('Penghuni ini tidak memiliki kontrak aktif.')
-      return
-    }
-
-    try {
-      await generateInvoice({ contract_id: contractId, period })
-      setShowForm(false)
-      setSelectedTenant('')
-      setPeriod('')
-      loadInvoices()
-    } catch (err) {
-      setError(err.response?.data?.message || 'Gagal generate invoice')
-    }
+  if (!contractId) {
+    setError('Penghuni ini tidak memiliki kontrak aktif.')
+    return
   }
+
+  try {
+    await generateInvoice({ contract_id: contractId })
+    setShowForm(false)
+    setSelectedTenant('')
+    loadInvoices()
+  } catch (err) {
+    setError(err.response?.data?.message || 'Gagal generate invoice')
+  }
+}
 
   const filteredInvoices = filter === 'all'
   ? invoices
@@ -215,10 +214,6 @@ export default function Invoices() {
                   <option value="">-- Pilih Penghuni --</option>
                   {tenants.map((t) => <option key={t.id} value={t.id}>{t.user?.name}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-muted mb-1.5">Periode</label>
-                <input type="month" value={period} onChange={(e) => setPeriod(e.target.value)} className={inputClass} required />
               </div>
               {error && <p className="text-sm text-rose-600">{error}</p>}
               <Button type="submit" className="w-full">Generate</Button>
