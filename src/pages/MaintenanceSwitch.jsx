@@ -6,6 +6,6 @@ import TenantMaintenance from './tenant/Maintenance'
 export default function MaintenanceSwitch() {
   const { user } = useAuthStore()
   if (user?.role === 'staff') return <StaffMaintenance />
-  if (user?.role === 'tenant') return <TenantMaintenance />
+  if (user?.role === 'customer') return <TenantMaintenance />
   return <AdminMaintenance />
 }

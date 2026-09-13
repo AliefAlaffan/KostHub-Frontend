@@ -8,6 +8,6 @@ export default function Dashboard() {
 
   if (user?.role === 'admin') return <AdminDashboard />
   if (user?.role === 'staff') return <StaffTasks />
-  if (user?.role === 'tenant') return <TenantHome />
+  if (user?.role === 'customer') return <TenantHome />
   return null
 }

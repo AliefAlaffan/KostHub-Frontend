@@ -4,6 +4,6 @@ import TenantReviews from './tenant/Reviews'
 
 export default function ReviewsSwitch() {
   const { user } = useAuthStore()
-  if (user?.role === 'tenant') return <TenantReviews />
+  if (user?.role === 'customer') return <TenantReviews />
   return <AdminReviews />
 }

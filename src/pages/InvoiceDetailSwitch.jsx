@@ -6,6 +6,6 @@ import TenantInvoiceDetail from './tenant/InvoiceDetail'
 export default function InvoiceDetailSwitch() {
   const { user } = useAuthStore()
   if (user?.role === 'staff') return <StaffInvoiceDetail />
-  if (user?.role === 'tenant') return <TenantInvoiceDetail />
+  if (user?.role === 'customer') return <TenantInvoiceDetail />
   return <AdminInvoiceDetail />
 }

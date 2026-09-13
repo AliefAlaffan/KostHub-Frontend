@@ -6,6 +6,6 @@ import TenantAnnouncements from './tenant/Announcements'
 export default function AnnouncementsSwitch() {
   const { user } = useAuthStore()
   if (user?.role === 'staff') return <StaffAnnouncements />
-  if (user?.role === 'tenant') return <TenantAnnouncements />
+  if (user?.role === 'customer') return <TenantAnnouncements />
   return <AdminAnnouncements />
 }

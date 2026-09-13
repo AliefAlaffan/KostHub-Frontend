@@ -6,6 +6,6 @@ import TenantHome from './tenant/Home'
 export default function DashboardSwitch() {
   const { user } = useAuthStore()
   if (user?.role === 'staff') return <StaffTasks />
-  if (user?.role === 'tenant') return <TenantHome />
+  if (user?.role === 'customer') return <TenantHome />
   return <AdminDashboard />
 }

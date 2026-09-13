@@ -6,6 +6,6 @@ import TenantSettings from './tenant/Settings'
 export default function SettingsSwitch() {
   const { user } = useAuthStore()
   if (user?.role === 'staff') return <StaffSettings />
-  if (user?.role === 'tenant') return <TenantSettings />
+  if (user?.role === 'customer') return <TenantSettings />
   return <AdminSettings />
 }
