@@ -48,7 +48,7 @@ export default function Home() {
               <Badge status={invoice.status} />
             </div>
             <Link
-              to={`/invoices/${invoice.id}`}
+              to={`/customer/tagihan/${invoice.id}`}
               className="flex items-center justify-center gap-2 w-full bg-indigo-600 text-white rounded-xl py-3.5 text-sm font-bold hover:bg-indigo-700 transition-colors"
             >
               Bayar Sekarang <ArrowRight size={16} />
@@ -63,7 +63,7 @@ export default function Home() {
         )}
 
         <div className="grid grid-cols-3 gap-3">
-          <Link to="/invoices" className="group">
+          <Link to="/customer/tagihan" className="group">
             <Card className="p-4 text-center hover:shadow-[var(--shadow-card-hover)] transition-shadow">
               <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center mx-auto mb-2">
                 <Receipt size={18} className="text-indigo-600" />
@@ -71,7 +71,7 @@ export default function Home() {
               <div className="text-xs font-semibold text-ink">Tagihan</div>
             </Card>
           </Link>
-          <Link to="/maintenance" className="group">
+          <Link to="/customer/komplain" className="group">
             <Card className="p-4 text-center hover:shadow-[var(--shadow-card-hover)] transition-shadow">
               <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center mx-auto mb-2">
                 <Wrench size={18} className="text-rose-600" />
@@ -79,7 +79,7 @@ export default function Home() {
               <div className="text-xs font-semibold text-ink">Komplain</div>
             </Card>
           </Link>
-          <Link to="/announcements" className="group">
+          <Link to="/customer/pengumuman" className="group">
             <Card className="p-4 text-center hover:shadow-[var(--shadow-card-hover)] transition-shadow">
               <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center mx-auto mb-2">
                 <Megaphone size={18} className="text-amber-600" />

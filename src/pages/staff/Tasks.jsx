@@ -45,7 +45,7 @@ export default function Tasks() {
       <div className="p-8 max-w-[1300px]">
         {/* Quick actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <Link to="/tenants" className="group">
+          <Link to="/staff/tenants" className="group">
             <Card className="p-5 flex items-center gap-4 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 transition-all duration-200">
               <div className="w-11 h-11 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
                 <UserPlus size={20} className="text-indigo-600" />
@@ -57,7 +57,7 @@ export default function Tasks() {
               <ArrowRight size={16} className="text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all" />
             </Card>
           </Link>
-          <Link to="/invoices" className="group">
+          <Link to="/staff/invoices" className="group">
             <Card className="p-5 flex items-center gap-4 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 transition-all duration-200">
               <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
                 <ReceiptText size={20} className="text-emerald-600" />

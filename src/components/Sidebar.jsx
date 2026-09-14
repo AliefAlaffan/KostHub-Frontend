@@ -3,57 +3,73 @@ import { useAuthStore } from '../store/authStore'
 import { logout } from '../api/auth'
 import {
   LayoutDashboard, Building2, DoorOpen, Users, FileText, Receipt,
-  Wrench, Megaphone, Star, BarChart3, UserCog, Settings, LogOut, ClipboardList,
+  Wrench, Megaphone, Star, BarChart3, UserCog, Settings, LogOut, ClipboardList, Bell,
 } from 'lucide-react'
 
 const SECTIONS = {
   admin: [
-    { label: 'UTAMA', items: [{ to: '/', label: 'Dashboard', icon: LayoutDashboard }] },
+    { label: 'UTAMA', items: [{ to: '/admin', label: 'Dashboard', icon: LayoutDashboard }] },
     { label: 'MANAJEMEN', items: [
-      { to: '/properties', label: 'Properti', icon: Building2 },
-      { to: '/rooms', label: 'Kamar', icon: DoorOpen },
-      { to: '/tenants', label: 'Penghuni', icon: Users },
-      { to: '/contracts', label: 'Kontrak', icon: FileText },
+      { to: '/admin/properties', label: 'Properti', icon: Building2 },
+      { to: '/admin/rooms', label: 'Kamar', icon: DoorOpen },
+      { to: '/admin/tenants', label: 'Penghuni', icon: Users },
+      { to: '/admin/contracts', label: 'Kontrak', icon: FileText },
     ]},
     { label: 'OPERASIONAL', items: [
-      { to: '/invoices', label: 'Tagihan', icon: Receipt },
-      { to: '/maintenance', label: 'Maintenance', icon: Wrench },
-      { to: '/announcements', label: 'Pengumuman', icon: Megaphone },
-      { to: '/reviews', label: 'Review', icon: Star },
+      { to: '/admin/invoices', label: 'Tagihan', icon: Receipt },
+      { to: '/admin/maintenance', label: 'Maintenance', icon: Wrench },
+      { to: '/admin/announcements', label: 'Pengumuman', icon: Megaphone },
+      { to: '/admin/reviews', label: 'Review', icon: Star },
     ]},
     { label: 'LAINNYA', items: [
-      { to: '/reports', label: 'Laporan', icon: BarChart3 },
-      { to: '/users', label: 'Manajemen User', icon: UserCog },
+      { to: '/admin/reports', label: 'Laporan', icon: BarChart3 },
+      { to: '/admin/users', label: 'Manajemen User', icon: UserCog },
+      { to: '/admin/notifications', label: 'Notifikasi', icon: Bell },
     ]},
   ],
   staff: [
-    { label: 'UTAMA', items: [{ to: '/', label: 'Tugas Hari Ini', icon: ClipboardList }] },
+    { label: 'UTAMA', items: [{ to: '/staff', label: 'Tugas Hari Ini', icon: ClipboardList }] },
     { label: 'MANAJEMEN', items: [
-      { to: '/rooms', label: 'Kamar', icon: DoorOpen },
-      { to: '/tenants', label: 'Penghuni', icon: Users },
-      { to: '/contracts', label: 'Kontrak', icon: FileText },
+      { to: '/staff/rooms', label: 'Kamar', icon: DoorOpen },
+      { to: '/staff/tenants', label: 'Penghuni', icon: Users },
+      { to: '/staff/contracts', label: 'Kontrak', icon: FileText },
     ]},
     { label: 'OPERASIONAL', items: [
-      { to: '/invoices', label: 'Tagihan', icon: Receipt },
-      { to: '/maintenance', label: 'Maintenance', icon: Wrench },
-      { to: '/announcements', label: 'Pengumuman', icon: Megaphone },
+      { to: '/staff/invoices', label: 'Tagihan', icon: Receipt },
+      { to: '/staff/maintenance', label: 'Maintenance', icon: Wrench },
+      { to: '/staff/announcements', label: 'Pengumuman', icon: Megaphone },
+      { to: '/staff/notifications', label: 'Notifikasi', icon: Bell },
     ]},
   ],
-  tenant: [
-    { label: 'UTAMA', items: [{ to: '/', label: 'Sewa Saya', icon: LayoutDashboard }] },
+  customer: [
+    { label: 'UTAMA', items: [{ to: '/customer', label: 'Sewa Saya', icon: LayoutDashboard }] },
     { label: 'LAYANAN', items: [
-      { to: '/invoices', label: 'Tagihan Saya', icon: Receipt },
-      { to: '/maintenance', label: 'Komplain', icon: Wrench },
-      { to: '/announcements', label: 'Pengumuman', icon: Megaphone },
-      { to: '/reviews', label: 'Beri Ulasan', icon: Star },
+      { to: '/customer/tagihan', label: 'Tagihan Saya', icon: Receipt },
+      { to: '/customer/komplain', label: 'Komplain', icon: Wrench },
+      { to: '/customer/pengumuman', label: 'Pengumuman', icon: Megaphone },
+      { to: '/customer/ulasan', label: 'Beri Ulasan', icon: Star },
+      { to: '/customer/notifikasi', label: 'Notifikasi', icon: Bell },
     ]},
   ],
+}
+
+const SETTINGS_PATH = {
+  admin: '/admin/settings',
+  staff: '/staff/settings',
+  customer: '/customer/pengaturan',
+}
+
+const PANEL_LABEL = {
+  admin: 'ADMIN PANEL',
+  staff: 'STAFF PANEL',
+  customer: 'PENGHUNI',
 }
 
 export default function Sidebar() {
   const { user, clearAuth } = useAuthStore()
   const navigate = useNavigate()
-  const sections = SECTIONS[user?.role] || []
+  const role = user?.role
+  const sections = SECTIONS[role] || []
 
   const handleLogout = async () => {
     try { await logout() } catch {}
@@ -73,7 +89,7 @@ export default function Sidebar() {
           <div className="font-display font-bold text-[15px] text-white leading-tight">
             Kost<span className="text-[var(--color-brand)]">Hub</span>
           </div>
-          <div className="text-[10px] text-zinc-500 tracking-wider">ADMIN PANEL</div>
+          <div className="text-[10px] text-zinc-500 tracking-wider">{PANEL_LABEL[role] || ''}</div>
         </div>
       </div>
 
@@ -88,7 +104,7 @@ export default function Sidebar() {
                   <NavLink
                     key={item.to}
                     to={item.to}
-                    end={item.to === '/'}
+                    end
                     className={({ isActive }) =>
                       `relative flex items-center gap-3 pl-3.5 pr-3 py-2.5 rounded-lg text-[13px] transition-all duration-150 border-l-[3px] ${
                         isActive
@@ -109,7 +125,7 @@ export default function Sidebar() {
 
       <div className="px-3 pb-3">
         <NavLink
-          to="/settings"
+          to={SETTINGS_PATH[role] || '/login'}
           className={({ isActive }) =>
             `flex items-center gap-3 pl-3.5 pr-3 py-2.5 rounded-lg text-[13px] mb-2 border-l-[3px] ${
               isActive ? 'bg-white/[0.06] text-white font-semibold border-[var(--color-brand)]' : 'text-zinc-500 font-medium border-transparent hover:bg-white/[0.03] hover:text-zinc-300'

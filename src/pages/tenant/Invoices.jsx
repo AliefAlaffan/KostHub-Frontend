@@ -34,7 +34,7 @@ export default function Invoices() {
         ) : (
           <div className="space-y-3">
             {invoices.map((inv) => (
-              <Link key={inv.id} to={`/invoices/${inv.id}`}>
+              	<Link key={inv.id} to={`/customer/tagihan/${inv.id}`}>
                 <Card className="p-4 flex items-center justify-between hover:shadow-[var(--shadow-card-hover)] transition-shadow">
                   <div>
                     <div className="text-sm font-mono text-slate-muted">{inv.period}</div>

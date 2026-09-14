@@ -97,7 +97,7 @@ export default function Tenants() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {tenants.map((t) => (
-              <Link key={t.id} to={`/tenants/${t.id}`}>
+              <Link key={t.id} to={`/staff/tenants/${t.id}`}>
                 <Card className="p-4 flex items-center gap-3 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
                   <div className="w-10 h-10 rounded-full bg-[var(--color-brand)]/10 text-[var(--color-brand)] flex items-center justify-center text-sm font-bold shrink-0">
                     {(t.user?.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}

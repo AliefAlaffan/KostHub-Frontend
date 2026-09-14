@@ -288,7 +288,7 @@ export default function Rooms() {
                     {roomDetail.active_contract.start_date} — {roomDetail.active_contract.end_date}
                   </div>
                   <Link
-                    to={`/tenants/${roomDetail.active_contract.tenant?.id}`}
+                   to={`/admin/tenants/${roomDetail.active_contract.tenant?.id}`}
                     className="block text-center bg-indigo-600 text-white rounded-lg py-2 text-xs font-semibold hover:bg-indigo-700 transition-colors"
                   >
                     Lihat Detail Penghuni

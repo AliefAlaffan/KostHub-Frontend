@@ -89,7 +89,7 @@ export default function InvoiceDetail() {
       <Topbar title="Detail Tagihan" breadcrumb={['KostHub', 'Tagihan', invoice.period]} />
 
       <div className="p-8 max-w-[900px]">
-        <Link to="/invoices" className="inline-flex items-center gap-1.5 text-sm text-slate-muted hover:text-ink mb-5 transition-colors">
+        <Link to="/staff/invoices" className="inline-flex items-center gap-1.5 text-sm text-slate-muted hover:text-ink mb-5 transition-colors">
           <ArrowLeft size={15} /> Kembali ke Tagihan
         </Link>
 

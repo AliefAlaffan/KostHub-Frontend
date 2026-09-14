@@ -16,7 +16,7 @@ export default function Login() {
     try {
       const data = await login(email, password)
       setAuth(data.user, data.token)
-      navigate('/dashboard')
+      navigate('/')
     } catch (err) {
       setError(err.response?.data?.message || 'Login gagal')
     }

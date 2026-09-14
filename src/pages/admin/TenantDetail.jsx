@@ -7,12 +7,15 @@ import Card from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
 import Skeleton from '../../components/ui/Skeleton'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
+import { useAuthStore } from '../../store/authStore'
 
 export default function TenantDetail() {
   const { id } = useParams()
   const [tenant, setTenant] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const { user } = useAuthStore()
+  const backPath = user?.role === 'staff' ? '/staff/tenants' : '/admin/tenants'
   const [deleteError, setDeleteError] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -78,7 +81,7 @@ const confirmDeleteTenant = async () => {
   setDeleteError('')
   try {
     await deleteTenant(tenant.id)
-    navigate('/tenants')
+    navigate(backPath)
   } catch (err) {
     setDeleteError(err.response?.data?.message || 'Gagal menghapus penghuni')
     setDeleting(false)
@@ -92,7 +95,7 @@ const confirmDeleteTenant = async () => {
 
       <div className="p-8 max-w-[1100px]">
         <Link
-          to="/tenants"
+          to={backPath}
           className="inline-flex items-center gap-1.5 text-sm text-slate-muted hover:text-ink mb-5 transition-colors"
         >
           <ArrowLeft size={15} />
