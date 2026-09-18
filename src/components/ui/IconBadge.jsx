@@ -3,6 +3,11 @@ const PALETTE = {
   teal: { bg: '#E1F5EE', fg: '#0F6E56' },
   blue: { bg: '#E6F1FB', fg: '#185FA5' },
   coral: { bg: '#FAECE7', fg: '#993C1D' },
+  indigo: { bg: '#EEF2FF', fg: '#4F46E5' },
+  emerald: { bg: '#ECFDF5', fg: '#059669' },
+  sky: { bg: '#F0F9FF', fg: '#0369A1' },
+  rose: { bg: '#FFF1F2', fg: '#E11D48' },
+  amber: { bg: '#FFFBEB', fg: '#D97706' },
 }
 
 export default function IconBadge({ icon: Icon, color = 'purple', size = 30 }) {

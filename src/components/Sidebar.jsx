@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { logout } from '../api/auth'
 import {
   LayoutDashboard, Building2, DoorOpen, Users, FileText, Receipt,
-  Wrench, Megaphone, Star, BarChart3, UserCog, Settings, LogOut, ClipboardList, Bell,
+  Wrench, Megaphone, Star, BarChart3, UserCog, Settings, LogOut,
+  ClipboardList, Bell, Menu, X, ChevronsLeft, ChevronsRight,
 } from 'lucide-react'
 
 const SECTIONS = {
@@ -21,53 +23,42 @@ const SECTIONS = {
       { to: '/admin/announcements', label: 'Pengumuman', icon: Megaphone },
       { to: '/admin/reviews', label: 'Review', icon: Star },
     ]},
-    { label: 'LAINNYA', items: [
+    { label: 'ANALISIS & SISTEM', items: [
       { to: '/admin/reports', label: 'Laporan', icon: BarChart3 },
       { to: '/admin/users', label: 'Manajemen User', icon: UserCog },
-      { to: '/admin/notifications', label: 'Notifikasi', icon: Bell },
     ]},
   ],
   staff: [
-    { label: 'UTAMA', items: [{ to: '/staff', label: 'Tugas Hari Ini', icon: ClipboardList }] },
-    { label: 'MANAJEMEN', items: [
+    { label: 'TUGAS HARIAN', items: [{ to: '/staff', label: 'Dashboard', icon: ClipboardList }] },
+    { label: 'OPERASIONAL LAPANGAN', items: [
       { to: '/staff/rooms', label: 'Kamar', icon: DoorOpen },
       { to: '/staff/tenants', label: 'Penghuni', icon: Users },
       { to: '/staff/contracts', label: 'Kontrak', icon: FileText },
-    ]},
-    { label: 'OPERASIONAL', items: [
       { to: '/staff/invoices', label: 'Tagihan', icon: Receipt },
       { to: '/staff/maintenance', label: 'Maintenance', icon: Wrench },
       { to: '/staff/announcements', label: 'Pengumuman', icon: Megaphone },
-      { to: '/staff/notifications', label: 'Notifikasi', icon: Bell },
     ]},
   ],
   customer: [
-    { label: 'UTAMA', items: [{ to: '/customer', label: 'Sewa Saya', icon: LayoutDashboard }] },
-    { label: 'LAYANAN', items: [
-      { to: '/customer/tagihan', label: 'Tagihan Saya', icon: Receipt },
+    { label: 'HUNIAN SAYA', items: [{ to: '/customer', label: 'Sewa Saya', icon: LayoutDashboard }] },
+    { label: 'LAYANAN PENYEWA', items: [
+      { to: '/customer/tagihan', label: 'Tagihan', icon: Receipt },
       { to: '/customer/komplain', label: 'Komplain', icon: Wrench },
       { to: '/customer/pengumuman', label: 'Pengumuman', icon: Megaphone },
       { to: '/customer/ulasan', label: 'Beri Ulasan', icon: Star },
-      { to: '/customer/notifikasi', label: 'Notifikasi', icon: Bell },
     ]},
   ],
 }
 
-const SETTINGS_PATH = {
-  admin: '/admin/settings',
-  staff: '/staff/settings',
-  customer: '/customer/pengaturan',
-}
-
-const PANEL_LABEL = {
-  admin: 'ADMIN PANEL',
-  staff: 'STAFF PANEL',
-  customer: 'PENGHUNI',
-}
+const SETTINGS_PATH = { admin: '/admin/settings', staff: '/staff/settings', customer: '/customer/pengaturan' }
+const PANEL_LABEL = { admin: 'Admin Console', staff: 'Staff Portal', customer: 'Resident Portal' }
 
 export default function Sidebar() {
   const { user, clearAuth } = useAuthStore()
   const navigate = useNavigate()
+  const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+
   const role = user?.role
   const sections = SECTIONS[role] || []
 
@@ -79,76 +70,126 @@ export default function Sidebar() {
 
   const initials = (user?.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
 
-  return (
-    <aside className="w-64 shrink-0 bg-[var(--color-navy)] flex flex-col h-screen sticky top-0">
-      <div className="flex items-center gap-2.5 px-5 pt-6 pb-7">
-        <div className="w-9 h-9 rounded-xl bg-[var(--color-brand)] flex items-center justify-center">
-          <Building2 size={16} className="text-white" strokeWidth={2.2} />
-        </div>
-        <div>
-          <div className="font-display font-bold text-[15px] text-white leading-tight">
-            Kost<span className="text-[var(--color-brand)]">Hub</span>
+  const navContent = (
+    <>
+      {/* Brand */}
+      <div className="h-16 px-5 border-b border-slate-200 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold text-base shrink-0 shadow-sm shadow-indigo-600/30">
+            K
           </div>
-          <div className="text-[10px] text-zinc-500 tracking-wider">{PANEL_LABEL[role] || ''}</div>
+          {!collapsed && (
+            <div className="truncate">
+              <span className="font-bold text-slate-900 text-base tracking-tight block leading-tight">KostHub</span>
+              <span className="text-[11px] font-medium text-slate-500 tracking-wide block uppercase">{PANEL_LABEL[role]}</span>
+            </div>
+          )}
         </div>
+        <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 lg:hidden">
+          <X size={18} />
+        </button>
       </div>
 
-      <nav className="flex-1 px-3 overflow-y-auto space-y-5 pb-4">
+      {/* Role badge */}
+      {!collapsed && (
+        <div className="px-4 pt-3 pb-1 shrink-0">
+          <div className="bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1.5 flex items-center justify-between text-xs">
+            <span className="text-indigo-700 font-semibold flex items-center gap-1.5 truncate capitalize">
+              <span className="w-2 h-2 rounded-full bg-indigo-600 shrink-0" />
+              {role}
+            </span>
+            <span className="text-[10px] bg-white border border-indigo-200 text-indigo-700 font-bold px-1.5 py-0.5 rounded uppercase">Active</span>
+          </div>
+        </div>
+      )}
+
+      {/* Nav */}
+      <nav className="flex-1 px-3 py-3 space-y-5 overflow-y-auto">
         {sections.map((section) => (
-          <div key={section.label}>
-            <div className="text-[10px] font-semibold text-zinc-600 tracking-wider px-3 mb-1.5">{section.label}</div>
-            <div className="space-y-0.5">
-              {section.items.map((item) => {
-                const Icon = item.icon
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end
-                    className={({ isActive }) =>
-                      `relative flex items-center gap-3 pl-3.5 pr-3 py-2.5 rounded-lg text-[13px] transition-all duration-150 border-l-[3px] ${
-                        isActive
-                          ? 'bg-white/[0.06] text-white font-semibold border-[var(--color-brand)]'
-                          : 'text-zinc-500 font-medium border-transparent hover:bg-white/[0.03] hover:text-zinc-300'
-                      }`
-                    }
-                  >
-                    <Icon size={16} strokeWidth={2} />
-                    {item.label}
-                  </NavLink>
-                )
-              })}
-            </div>
+          <div key={section.label} className="space-y-1">
+            {!collapsed && (
+              <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">{section.label}</p>
+            )}
+            {section.items.map((item) => {
+              const Icon = item.icon
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end
+                  title={item.label}
+                  onClick={() => setMobileOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center ${collapsed ? 'justify-center px-2' : 'px-3.5'} py-2 rounded-xl text-xs font-semibold transition-colors ${
+                      isActive ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
+                    }`
+                  }
+                >
+                  <Icon size={16} strokeWidth={2} className="shrink-0" />
+                  {!collapsed && <span className="ml-3 truncate">{item.label}</span>}
+                </NavLink>
+              )
+            })}
           </div>
         ))}
       </nav>
 
-      <div className="px-3 pb-3">
-        <NavLink
-          to={SETTINGS_PATH[role] || '/login'}
-          className={({ isActive }) =>
-            `flex items-center gap-3 pl-3.5 pr-3 py-2.5 rounded-lg text-[13px] mb-2 border-l-[3px] ${
-              isActive ? 'bg-white/[0.06] text-white font-semibold border-[var(--color-brand)]' : 'text-zinc-500 font-medium border-transparent hover:bg-white/[0.03] hover:text-zinc-300'
-            }`
-          }
-        >
-          <Settings size={16} strokeWidth={2} />
-          Pengaturan
-        </NavLink>
+      {/* Collapse toggle (desktop only) */}
+      <button
+        onClick={() => setCollapsed((c) => !c)}
+        className="hidden lg:flex items-center gap-2 mx-3 mb-2 px-3 py-2 rounded-lg text-[11px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-slate-700 shrink-0"
+      >
+        {collapsed ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}
+        {!collapsed && <span>Ciutkan Sidebar</span>}
+      </button>
 
-        <div className="bg-white/[0.04] rounded-xl px-3.5 py-3 flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-white text-xs font-bold shrink-0">
-            {initials}
+      {/* Profile footer */}
+      <div className="p-3 border-t border-slate-200 shrink-0">
+        <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-2 rounded-xl hover:bg-slate-50 transition-colors`}>
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <div className="w-9 h-9 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 ring-2 ring-indigo-100">
+              {initials}
+            </div>
+            {!collapsed && (
+              <div className="truncate text-left">
+                <p className="text-xs font-bold text-slate-800 truncate leading-tight">{user?.name}</p>
+                <p className="text-[10px] text-slate-500 truncate leading-tight mt-0.5 capitalize">{role}</p>
+              </div>
+            )}
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-[13px] font-semibold text-white truncate">{user?.name}</div>
-            <div className="text-[11px] text-zinc-500 capitalize">{user?.role}</div>
-          </div>
-          <button onClick={handleLogout} className="text-zinc-500 hover:text-rose-400 transition-colors">
-            <LogOut size={15} />
-          </button>
+          {!collapsed && (
+            <button onClick={handleLogout} title="Keluar" className="text-slate-400 hover:text-rose-600 p-1 rounded transition-colors">
+              <LogOut size={15} />
+            </button>
+          )}
         </div>
       </div>
-    </aside>
+    </>
+  )
+
+  return (
+    <>
+      {/* Mobile hamburger trigger, fixed di pojok - Layout/Topbar gak perlu tau soal ini */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="lg:hidden fixed top-3 left-3 z-30 p-2 rounded-lg bg-white border border-slate-200 shadow-sm text-slate-600"
+      >
+        <Menu size={18} />
+      </button>
+
+      {/* Backdrop mobile */}
+      {mobileOpen && (
+        <div onClick={() => setMobileOpen(false)} className="fixed inset-0 bg-slate-900/50 z-30 lg:hidden" />
+      )}
+
+      <aside
+        className={`bg-white border-r border-slate-200 h-screen flex flex-col shrink-0 z-40 transition-all duration-300
+          fixed lg:sticky top-0 lg:translate-x-0
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+          ${collapsed ? 'lg:w-20' : 'lg:w-64'} w-64`}
+      >
+        {navContent}
+      </aside>
+    </>
   )
 }
