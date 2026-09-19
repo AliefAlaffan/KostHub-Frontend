@@ -1,172 +1,266 @@
 import { useEffect, useState } from 'react'
-import { Building2, Plus, X, MapPin } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Building2, Plus, MapPin, DoorOpen, ArrowRight, QrCode, Image as ImageIcon } from 'lucide-react'
 import { getProperties, createProperty } from '../../api/properties'
+import { storageUrl } from '../../lib/storageUrl'
 import Topbar from '../../components/Topbar'
+import PageHeader from '../../components/ui/PageHeader'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
+import Modal from '../../components/ui/Modal'
+import Input from '../../components/ui/Input'
+import Select from '../../components/ui/Select'
+import Textarea from '../../components/ui/Textarea'
 import Skeleton from '../../components/ui/Skeleton'
-import { QrCode, Upload, Trash2 } from 'lucide-react'
-import { uploadQris, deleteQris } from '../../api/properties'
+import EmptyState from '../../components/ui/EmptyState'
+import ErrorState from '../../components/ui/ErrorState'
+import { useToast } from '../../components/ui/Toast'
+
+const TYPE_LABEL = { campur: 'Campur', putra: 'Putra', putri: 'Putri' }
+const TYPE_TONE = { campur: 'bg-indigo-600', putra: 'bg-sky-600', putri: 'bg-rose-500' }
 
 export default function Properties() {
+  const navigate = useNavigate()
+  const toast = useToast()
+
   const [properties, setProperties] = useState([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ name: '', address: '', city: '', type: 'campur', description: '' })
   const [error, setError] = useState('')
+  const [showForm, setShowForm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({ name: '', address: '', city: '', type: 'campur', description: '' })
+  const [formError, setFormError] = useState('')
 
   const load = () => {
     setLoading(true)
-    getProperties().then((data) => { setProperties(data); setLoading(false) })
+    setError('')
+    getProperties()
+      .then(setProperties)
+      .catch(() => setError('Gagal memuat daftar properti.'))
+      .finally(() => setLoading(false))
   }
+
   useEffect(() => { load() }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError('')
+    setFormError('')
+    setSaving(true)
     try {
       await createProperty(form)
       setForm({ name: '', address: '', city: '', type: 'campur', description: '' })
       setShowForm(false)
+      toast.success('Properti baru berhasil disimpan')
       load()
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal menambah properti')
+      setFormError(err.response?.data?.message || 'Gagal menambah properti')
+    } finally {
+      setSaving(false)
     }
   }
 
-  const inputClass = "w-full px-3 py-2.5 border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+  const totalProperties = properties.length
+  const totalRooms = properties.reduce((sum, p) => sum + (p.rooms_count ?? p.rooms?.length ?? 0), 0)
+
+  if (error) {
+    return (
+      <div>
+        <Topbar title="Properti Kost" breadcrumb={['KostHub', 'Properti']} />
+        <div className="p-8 max-w-[1300px] mx-auto">
+          <ErrorState description={error} onRetry={load} />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
-      <Topbar title="Properti" breadcrumb={['KostHub', 'Properti']} />
+      <Topbar title="Properti Kost" breadcrumb={['KostHub', 'Properti']} />
 
-      <div className="p-8 max-w-[1300px]">
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-sm text-slate-muted">{properties.length} properti terdaftar</p>
-          <Button onClick={() => setShowForm(true)}>
-            <span className="flex items-center gap-2"><Plus size={16} /> Tambah Properti</span>
-          </Button>
-        </div>
+      <div className="p-8 max-w-[1300px] mx-auto flex flex-col gap-6">
+        <PageHeader
+          title="Properti Kost"
+          pill={`${totalProperties} Properti Aktif`}
+          description="Kelola informasi bangunan, unit kamar, dan konfigurasi QRIS pembayaran digital penghuni."
+          actions={
+            <Button onClick={() => setShowForm(true)}>
+              <Plus size={16} /> Tambah Properti Baru
+            </Button>
+          }
+        />
 
+        {/* KPI ringkas */}
+        {!loading && properties.length > 0 && (
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="p-4 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+                <Building2 size={24} />
+              </div>
+              <div>
+                <span className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Total Properti</span>
+                <div className="text-2xl font-extrabold text-slate-900">{totalProperties}</div>
+              </div>
+            </Card>
+            <Card className="p-4 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 shrink-0">
+                <DoorOpen size={24} />
+              </div>
+              <div>
+                <span className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Total Kamar Terdaftar</span>
+                <div className="text-2xl font-extrabold text-slate-900">{totalRooms}</div>
+              </div>
+            </Card>
+          </section>
+        )}
+
+        {/* Grid kartu properti */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-32" />)}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-96" shimmer />)}
           </div>
         ) : properties.length === 0 ? (
-          <Card className="p-10 text-center">
-            <div className="w-12 h-12 rounded-full bg-[var(--color-paper)] flex items-center justify-center mx-auto mb-3">
-              <Building2 size={22} className="text-slate-300" />
-            </div>
-            <p className="text-slate-muted text-sm">Belum ada properti terdaftar.</p>
-            <Button onClick={() => setShowForm(true)} className="mt-4">Tambah Properti Pertama</Button>
-          </Card>
+          <EmptyState
+            icon={Building2}
+            title="Belum Ada Properti Terdaftar"
+            description="Tambahkan properti pertama Anda untuk mengelola penagihan otomatis, status unit kamar, kontrak sewa penyewa, dan QRIS instan."
+            action={{ label: '+ Tambah Properti Pertama', onClick: () => setShowForm(true) }}
+          />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {properties.map((p) => (
-              <Card key={p.id} className="p-5">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center mb-3">
-                  <Building2 size={18} className="text-indigo-600" />
+              <div key={p.id} className="flex flex-col rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all overflow-hidden">
+                {/* Media header */}
+                <div
+                  className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100 cursor-pointer"
+                  onClick={() => navigate(`/admin/properties/${p.id}`)}
+                >
+                  {p.photo ? (
+                    <img src={storageUrl(p.photo)} alt={p.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-300">
+                      <ImageIcon size={40} />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+                  <div className="absolute top-3 left-3 flex items-center gap-2">
+                    <span className={`px-2.5 py-0.5 rounded-full text-white text-[11px] font-bold shadow-sm ${TYPE_TONE[p.type]}`}>
+                      {TYPE_LABEL[p.type]}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/95 text-emerald-700 text-[11px] font-bold shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      {p.status === 'active' ? 'Aktif' : 'Nonaktif'}
+                    </span>
+                  </div>
+                  <div className="absolute bottom-3 left-4 right-4 flex items-center gap-1.5 text-xs text-slate-200">
+                    <MapPin size={14} />
+                    <span>{p.city}</span>
+                  </div>
                 </div>
-                <h3 className="font-display font-bold text-ink mb-1">{p.name}</h3>
-                <p className="text-xs text-slate-muted flex items-center gap-1.5 mb-2">
-                  <MapPin size={12} /> {p.city}
-                </p>
-                <span className="inline-block text-[10px] font-semibold px-2 py-1 rounded-full bg-[var(--color-paper)] text-slate-600 capitalize mb-3">
-                  {p.type}
-                </span>
 
-                <QrisManager property={p} onUpdated={load} />
-              </Card>
+                {/* Body */}
+                <div className="p-5 flex flex-col flex-1 space-y-4">
+                  <div>
+                    <h2
+                      className="text-lg font-bold text-slate-900 hover:text-indigo-600 cursor-pointer transition-colors"
+                      onClick={() => navigate(`/admin/properties/${p.id}`)}
+                    >
+                      {p.name}
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-1">{p.address}</p>
+                  </div>
+
+                  {/* Mini metrics grid - data asli dari withCount di backend */}
+                  <div className="grid grid-cols-4 gap-2 p-3 rounded-lg bg-slate-50 border border-slate-100 text-center">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Kamar</span>
+                      <span className="text-sm font-bold text-slate-900 mt-0.5 block">{p.rooms_count ?? 0}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Terisi</span>
+                      <span className="text-sm font-bold text-emerald-600 mt-0.5 block">{p.occupied_rooms_count ?? 0}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Tersedia</span>
+                      <span className="text-sm font-bold text-indigo-600 mt-0.5 block">{p.available_rooms_count ?? 0}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Okupansi</span>
+                      <span className="text-sm font-bold text-slate-900 mt-0.5 block">
+                        {p.rooms_count > 0 ? Math.round((p.occupied_rooms_count / p.rooms_count) * 100) : 0}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Occupancy bar */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-500">Tingkat Okupansi</span>
+                      <span className="text-slate-800 font-bold">{p.occupied_rooms_count ?? 0} dari {p.rooms_count ?? 0} Unit Terisi</span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${TYPE_TONE[p.type]}`}
+                        style={{ width: `${p.rooms_count > 0 ? (p.occupied_rooms_count / p.rooms_count) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {p.qris_image && (
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                        <QrCode size={18} className="text-slate-700" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-slate-900">QRIS Aktif</span>
+                        <p className="text-[11px] text-slate-500">Siap terima pembayaran digital</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-2 flex items-center justify-between gap-2 mt-auto border-t border-slate-100">
+                    <Button variant="outline" size="sm" onClick={() => navigate(`/admin/properties/${p.id}`)}>
+                      Detail
+                    </Button>
+                    <Button size="sm" onClick={() => navigate(`/admin/rooms?property_id=${p.id}`)}>
+                      <DoorOpen size={14} /> Kelola Kamar <ArrowRight size={14} />
+                    </Button>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         )}
       </div>
 
-      {showForm && (
-        <div className="fixed inset-0 bg-[#0A0B0F]/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div
-            className="w-full max-w-sm p-6 relative rounded-xl"
-            style={{ backgroundColor: '#FFFFFF', boxShadow: '0 20px 40px rgba(0,0,0,0.25)' }}
-          >
-            <button onClick={() => setShowForm(false)} className="absolute top-4 right-4 text-slate-muted hover:text-ink">
-              <X size={18} />
-            </button>
-            <h3 className="font-display text-lg font-bold text-ink mb-5">Tambah Properti</h3>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <input placeholder="Nama Kost" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputClass} required />
-              <input placeholder="Alamat" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className={inputClass} required />
-              <input placeholder="Kota" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className={inputClass} required />
-              <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className={inputClass}>
-                <option value="campur">Campur</option>
-                <option value="putra">Putra</option>
-                <option value="putri">Putri</option>
-              </select>
-              <textarea placeholder="Deskripsi (opsional)" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={inputClass} />
-              {error && <p className="text-sm text-rose-600">{error}</p>}
-              <Button type="submit" className="w-full">Simpan Properti</Button>
-            </form>
+      {/* Modal Tambah Properti */}
+      <Modal open={showForm} onClose={() => setShowForm(false)} title="Tambah Properti Baru" subtitle="Isi informasi bangunan untuk mulai mengelolanya." size="lg">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input label="Nama Properti" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Contoh: Kost Melati Indah" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input label="Kota / Lokasi" required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Contoh: Jakarta Selatan" />
+            <Select
+              label="Tipe Kost"
+              required
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value })}
+              options={[{ value: 'campur', label: 'Campur' }, { value: 'putra', label: 'Putra' }, { value: 'putri', label: 'Putri' }]}
+            />
           </div>
-        </div>
-      )}
-    </div>
-  )
-}
+          <Textarea label="Alamat Lengkap" required value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Jl. Raya Gatot Subroto No..." />
+          <Textarea label="Deskripsi (opsional)" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Ceritakan fasilitas & keunggulan properti ini" />
 
-function QrisManager({ property, onUpdated }) {
-  const [uploading, setUploading] = useState(false)
+          <p className="text-[11px] text-slate-400">
+            Foto properti dan QRIS bisa diunggah nanti dari halaman Detail Properti setelah properti ini tersimpan.
+          </p>
 
-  const handleUpload = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
+          {formError && <p className="text-sm text-rose-600">{formError}</p>}
 
-    setUploading(true)
-    const formData = new FormData()
-    formData.append('qris_image', file)
-
-    try {
-      await uploadQris(property.id, formData)
-      onUpdated()
-    } catch (err) {
-      alert(err.response?.data?.message || 'Gagal upload QRIS')
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  const handleDelete = async () => {
-    if (!confirm('Hapus QRIS properti ini?')) return
-    await deleteQris(property.id)
-    onUpdated()
-  }
-
-  return (
-    <div className="border-t border-[var(--color-border)] pt-3 mt-1">
-      <div className="flex items-center gap-1.5 mb-2">
-        <QrCode size={13} className="text-slate-muted" />
-        <span className="text-xs font-semibold text-slate-600">QRIS Pembayaran</span>
-      </div>
-
-      {property.qris_image ? (
-        <div className="flex items-center gap-2">
-          <img
-            src={`http://localhost:8000/storage/${property.qris_image}`}
-            alt="QRIS"
-            className="w-14 h-14 rounded-lg border border-[var(--color-border)] object-cover"
-          />
-          <button
-            onClick={handleDelete}
-            className="text-xs text-rose-600 hover:text-rose-800 flex items-center gap-1"
-          >
-            <Trash2 size={12} /> Hapus
-          </button>
-        </div>
-      ) : (
-        <label className="flex items-center justify-center gap-1.5 border border-dashed border-[var(--color-border)] rounded-lg py-2.5 text-xs text-slate-muted cursor-pointer hover:bg-[var(--color-paper)] transition-colors">
-          <Upload size={13} />
-          {uploading ? 'Mengunggah...' : 'Upload QRIS'}
-          <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
-        </label>
-      )}
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Batalkan</Button>
+            <Button type="submit" loading={saving}>Simpan Properti</Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   )
 }

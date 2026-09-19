@@ -90,19 +90,6 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* Role badge */}
-      {!collapsed && (
-        <div className="px-4 pt-3 pb-1 shrink-0">
-          <div className="bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1.5 flex items-center justify-between text-xs">
-            <span className="text-indigo-700 font-semibold flex items-center gap-1.5 truncate capitalize">
-              <span className="w-2 h-2 rounded-full bg-indigo-600 shrink-0" />
-              {role}
-            </span>
-            <span className="text-[10px] bg-white border border-indigo-200 text-indigo-700 font-bold px-1.5 py-0.5 rounded uppercase">Active</span>
-          </div>
-        </div>
-      )}
-
       {/* Nav */}
       <nav className="flex-1 px-3 py-3 space-y-5 overflow-y-auto">
         {sections.map((section) => (

@@ -14,6 +14,7 @@ import CustomerLayout from './components/CustomerLayout'
 // Admin
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminProperties from './pages/admin/Properties'
+import AdminPropertyDetail from './pages/admin/PropertyDetail'
 import AdminRooms from './pages/admin/Rooms'
 import AdminTenants from './pages/admin/Tenants'
 import AdminTenantDetail from './pages/admin/TenantDetail'
@@ -84,6 +85,7 @@ export default function App() {
           <Route element={<AdminLayout />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/properties" element={<AdminProperties />} />
+            <Route path="/admin/properties/:id" element={<AdminPropertyDetail />} />
             <Route path="/admin/rooms" element={<AdminRooms />} />
             <Route path="/admin/tenants" element={<AdminTenants />} />
             <Route path="/admin/tenants/:id" element={<AdminTenantDetail />} />
